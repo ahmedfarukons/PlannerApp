@@ -1,0 +1,405 @@
+<Window x:Class="StudyPlanner.Views.DocumentAnalyzerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Döküman Analiz - Paper Bold AI" 
+        Height="800" Width="1400"
+        WindowStartupLocation="CenterScreen"
+        Background="#FAFAFA">
+
+    <Window.Resources>
+        <!-- Minimalist renk paleti -->
+        <SolidColorBrush x:Key="PrimaryColor" Color="#2196F3"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#FF5722"/>
+        <SolidColorBrush x:Key="BackgroundColor" Color="#FAFAFA"/>
+        <SolidColorBrush x:Key="CardColor" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextPrimaryColor" Color="#212121"/>
+        <SolidColorBrush x:Key="TextSecondaryColor" Color="#757575"/>
+
+        <!-- Boolean to Visibility Converter -->
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        
+        <!-- Inverse Boolean Converter -->
+        <Style x:Key="InverseVisibility" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasDocument}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!-- Modern Button Style -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.8"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!-- User Message Style -->
+        <Style x:Key="UserMessageStyle" TargetType="Border">
+            <Setter Property="Background" Value="#E3F2FD"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Margin" Value="50,5,10,5"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+        
+        <!-- AI Message Style -->
+        <Style x:Key="AiMessageStyle" TargetType="Border">
+            <Setter Property="Background" Value="#F5F5F5"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Margin" Value="10,5,50,5"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+
+        <!-- Message Template -->
+        <DataTemplate x:Key="ChatMessageTemplate">
+            <Border>
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                <Setter Property="Background" Value="#E3F2FD"/>
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Margin" Value="50,5,10,5"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsUser}" Value="False">
+                                <Setter Property="Background" Value="#F5F5F5"/>
+                                <Setter Property="HorizontalAlignment" Value="Left"/>
+                                <Setter Property="Margin" Value="10,5,50,5"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="CornerRadius" Value="12"/>
+                        <Setter Property="Padding" Value="16,12"/>
+                    </Style>
+                </Border.Style>
+                <StackPanel>
+                    <TextBlock Text="{Binding Content}" 
+                             TextWrapping="Wrap"
+                             FontSize="14"
+                             Foreground="{StaticResource TextPrimaryColor}"/>
+                    <TextBlock Text="{Binding TimeDisplay}" 
+                             FontSize="11"
+                             Foreground="{StaticResource TextSecondaryColor}"
+                             Margin="0,4,0,0"
+                             HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Header -->
+            <RowDefinition Height="*"/>    <!-- Content -->
+        </Grid.RowDefinitions>
+
+        <!-- Modern Header -->
+        <Border Grid.Row="0" Background="{StaticResource PrimaryColor}" Height="80">
+            <Grid Margin="30,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Logo & Title -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="📄 Paper Bold AI" 
+                             FontSize="28" 
+                             FontWeight="Bold" 
+                             Foreground="White"/>
+                    <TextBlock Text="Akademik Döküman Analiz Asistanı" 
+                             FontSize="13" 
+                             Foreground="#E3F2FD"
+                             Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="📂 PDF Yükle" 
+                            Command="{Binding UploadPdfCommand}"
+                            Style="{StaticResource ModernButton}"
+                            Width="140" Height="40"
+                            Margin="5"
+                            IsEnabled="{Binding IsProcessing, Converter={StaticResource BoolToVis}}"/>
+                    
+                    <Button Content="🆕 Yeni" 
+                            Command="{Binding NewDocumentCommand}"
+                            Style="{StaticResource ModernButton}"
+                            Width="120" Height="40"
+                            Margin="5"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="20">
+            
+            <!-- Empty State -->
+            <Border Style="{StaticResource InverseVisibility}"
+                    Background="{StaticResource CardColor}"
+                    CornerRadius="16"
+                    Padding="60"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    MaxWidth="500">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="📚" 
+                             FontSize="80" 
+                             HorizontalAlignment="Center"
+                             Margin="0,0,0,20"/>
+                    <TextBlock Text="PDF Dökümanınızı Yükleyin" 
+                             FontSize="24" 
+                             FontWeight="SemiBold"
+                             Foreground="{StaticResource TextPrimaryColor}"
+                             HorizontalAlignment="Center"
+                             Margin="0,0,0,10"/>
+                    <TextBlock Text="Akademik makalelerinizi AI ile analiz edin, özetleyin ve soru sorun" 
+                             FontSize="14" 
+                             Foreground="{StaticResource TextSecondaryColor}"
+                             TextAlignment="Center"
+                             TextWrapping="Wrap"
+                             Margin="0,0,0,30"/>
+                    
+                    <Button Content="PDF Dosyası Seçin"
+                            Command="{Binding UploadPdfCommand}"
+                            Style="{StaticResource ModernButton}"
+                            Height="50"
+                            FontSize="16"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Document Loaded State -->
+            <Grid Visibility="{Binding HasDocument, Converter={StaticResource BoolToVis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.2*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Panel - Document Info -->
+                <Border Grid.Column="0" 
+                        Background="{StaticResource CardColor}"
+                        CornerRadius="16"
+                        Padding="30"
+                        Margin="0,0,10,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <!-- Document Header -->
+                            <TextBlock Text="📄 Döküman Bilgileri" 
+                                     FontSize="20" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimaryColor}"
+                                     Margin="0,0,0,20"/>
+
+                            <!-- File Name -->
+                            <TextBlock Text="Dosya Adı" 
+                                     FontSize="12" 
+                                     Foreground="{StaticResource TextSecondaryColor}"
+                                     Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding CurrentDocument.FileName}" 
+                                     FontSize="14" 
+                                     FontWeight="Medium"
+                                     Foreground="{StaticResource TextPrimaryColor}"
+                                     TextWrapping="Wrap"
+                                     Margin="0,0,0,20"/>
+
+                            <!-- Stats -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                <StackPanel Margin="0,0,20,0">
+                                    <TextBlock Text="📊 Sayfa" 
+                                             FontSize="12" 
+                                             Foreground="{StaticResource TextSecondaryColor}"/>
+                                    <TextBlock Text="{Binding CurrentDocument.PageCount}" 
+                                             FontSize="24" 
+                                             FontWeight="Bold"
+                                             Foreground="{StaticResource PrimaryColor}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="💾 Boyut" 
+                                             FontSize="12" 
+                                             Foreground="{StaticResource TextSecondaryColor}"/>
+                                    <TextBlock Text="{Binding CurrentDocument.FileSizeDisplay}" 
+                                             FontSize="24" 
+                                             FontWeight="Bold"
+                                             Foreground="{StaticResource PrimaryColor}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <Separator Margin="0,0,0,20"/>
+
+                            <!-- Summary -->
+                            <TextBlock Text="📝 Özet" 
+                                     FontSize="16" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimaryColor}"
+                                     Margin="0,0,0,10"/>
+                            <Border Background="#F5F5F5" 
+                                    CornerRadius="8" 
+                                    Padding="15"
+                                    Margin="0,0,0,20">
+                                <TextBlock Text="{Binding CurrentDocument.Summary}" 
+                                         TextWrapping="Wrap"
+                                         FontSize="13"
+                                         LineHeight="20"
+                                         Foreground="{StaticResource TextPrimaryColor}"/>
+                            </Border>
+
+                            <!-- Models Used -->
+                            <TextBlock Text="🔬 Kullanılan Modeller/Algoritmalar" 
+                                     FontSize="16" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimaryColor}"
+                                     Margin="0,0,0,10"/>
+                            <Border Background="#E3F2FD" 
+                                    CornerRadius="8" 
+                                    Padding="15">
+                                <TextBlock Text="{Binding CurrentDocument.ModelsUsed}" 
+                                         TextWrapping="Wrap"
+                                         FontSize="13"
+                                         LineHeight="20"
+                                         Foreground="{StaticResource TextPrimaryColor}"/>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Right Panel - Chat -->
+                <Border Grid.Column="1" 
+                        Background="{StaticResource CardColor}"
+                        CornerRadius="16"
+                        Margin="10,0,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Chat Header -->
+                        <Border Grid.Row="0" 
+                                Background="{StaticResource PrimaryColor}"
+                                CornerRadius="16,16,0,0"
+                                Padding="30,20">
+                            <TextBlock Text="💬 Döküman Hakkında Soru Sorun" 
+                                     FontSize="18" 
+                                     FontWeight="SemiBold"
+                                     Foreground="White"/>
+                        </Border>
+
+                        <!-- Messages -->
+                        <ScrollViewer Grid.Row="1" 
+                                    VerticalScrollBarVisibility="Auto"
+                                    Padding="20">
+                            <ItemsControl ItemsSource="{Binding ChatMessages}"
+                                        ItemTemplate="{StaticResource ChatMessageTemplate}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <!-- Input Area -->
+                        <Border Grid.Row="2" 
+                                Background="#F9F9F9"
+                                CornerRadius="0,0,16,16"
+                                Padding="20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0"
+                                        Text="{Binding QuestionText, UpdateSourceTrigger=PropertyChanged}"
+                                        FontSize="14"
+                                        Height="50"
+                                        VerticalContentAlignment="Center"
+                                        Padding="10"
+                                        Margin="0,0,10,0">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding AskQuestionCommand}"/>
+                                    </TextBox.InputBindings>
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Style.Triggers>
+                                                <Trigger Property="Text" Value="">
+                                                    <Setter Property="Background">
+                                                        <Setter.Value>
+                                                            <VisualBrush Stretch="None" AlignmentX="Left">
+                                                                <VisualBrush.Visual>
+                                                                    <TextBlock Text="Sorunuzu buraya yazın..." 
+                                                                             Foreground="#AAAAAA" 
+                                                                             Margin="10,0,0,0"/>
+                                                                </VisualBrush.Visual>
+                                                            </VisualBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+
+                                <Button Grid.Column="1"
+                                        Content="➤ Gönder"
+                                        Command="{Binding AskQuestionCommand}"
+                                        Style="{StaticResource ModernButton}"
+                                        Width="120"
+                                        Height="50"
+                                        FontSize="14"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Loading Overlay -->
+            <Border Background="#80000000" 
+                    Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}}"
+                    Grid.RowSpan="2">
+                <StackPanel VerticalAlignment="Center" 
+                          HorizontalAlignment="Center">
+                    <TextBlock Text="⏳" 
+                             FontSize="60"
+                             HorizontalAlignment="Center"/>
+                    <TextBlock Text="İşleniyor..." 
+                             FontSize="18" 
+                             Foreground="White"
+                             Margin="0,20,0,0"
+                             HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
+

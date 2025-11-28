@@ -1,0 +1,83 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <AssemblyName>StudyPlanner</AssemblyName>
+    <RootNamespace>StudyPlanner</RootNamespace>
+    <ApplicationIcon />
+    <StartupObject>StudyPlanner.App</StartupObject>
+    <Authors>StudyPlanner Team</Authors>
+    <Company>StudyPlanner</Company>
+    <Product>Study Planner</Product>
+    <Description>Modern çalışma planlayıcı uygulaması - WPF + MVVM + Clean Architecture</Description>
+    <Version>2.0.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Microsoft Extensions for Dependency Injection -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    
+    <!-- Configuration -->
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+    
+    <!-- DevExpress WPF Controls (Uncomment if you have DevExpress license) -->
+    <!-- Use version 24.1.6-pre-24252 if using local DevExpress -->
+    <!-- 
+    <PackageReference Include="DevExpress.Wpf.Core" Version="24.1.6-pre-24252" />
+    <PackageReference Include="DevExpress.Wpf.Grid" Version="24.1.6-pre-24252" />
+    <PackageReference Include="DevExpress.Wpf.Themes.All" Version="24.1.6-pre-24252" />
+    <PackageReference Include="DevExpress.Wpf.Controls" Version="24.1.6-pre-24252" />
+    <PackageReference Include="DevExpress.Wpf.LayoutControl" Version="24.1.6-pre-24252" />
+    -->
+    
+    <!-- PDF Processing -->
+    <PackageReference Include="itext7" Version="8.0.2" />
+    
+    <!-- HTTP Client -->
+    <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copy config files to output -->
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update=".env">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Folders -->
+    <Folder Include="Models\" />
+    <Folder Include="ViewModels\" />
+    <Folder Include="Views\" />
+    <Folder Include="Services\" />
+    <Folder Include="Repositories\" />
+    <Folder Include="Interfaces\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Eski WinForms dosyalarını compile'dan hariç tut -->
+    <Compile Remove="OldWinForms\**" />
+    <EmbeddedResource Remove="OldWinForms\**" />
+    <None Remove="OldWinForms\**" />
+    <Page Remove="OldWinForms\**" />
+  </ItemGroup>
+
+</Project>

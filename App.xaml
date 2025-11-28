@@ -1,0 +1,26 @@
+<Application x:Class="StudyPlanner.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Startup="Application_Startup">
+    <Application.Resources>
+        <!-- Global Styles -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- DevExpress themes buraya eklenebilir -->
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Modern Color Scheme -->
+            <SolidColorBrush x:Key="PrimaryColor" Color="#007ACC"/>
+            <SolidColorBrush x:Key="SecondaryColor" Color="#28A745"/>
+            <SolidColorBrush x:Key="DangerColor" Color="#DC3545"/>
+            <SolidColorBrush x:Key="WarningColor" Color="#FFC107"/>
+            <SolidColorBrush x:Key="InfoColor" Color="#17A2B8"/>
+            
+            <!-- Font Family -->
+            <FontFamily x:Key="MainFont">Segoe UI</FontFamily>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
+
+
+
