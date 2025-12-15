@@ -12,6 +12,7 @@ namespace StudyPlanner.Helpers
     {
         private static IConfiguration? _configuration;
         private static readonly object _lock = new object();
+        private const string GoogleApiKeyEnvVarName = "GOOGLE_API_KEY";
 
         /// <summary>
         /// Konfigürasyonu yükler
@@ -63,8 +64,25 @@ namespace StudyPlanner.Helpers
         /// </summary>
         private static void LoadEnvFile()
         {
-            var envFile = Path.Combine(Directory.GetCurrentDirectory(), ".env");
-            if (!File.Exists(envFile))
+            // Bazı çalıştırma senaryolarında CurrentDirectory ve BaseDirectory farklı olabilir.
+            // İkisini de deneriz (örn: Visual Studio, dotnet run, yayınlanan exe).
+            var candidateEnvFiles = new[]
+            {
+                Path.Combine(Directory.GetCurrentDirectory(), ".env"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env")
+            };
+
+            string? envFile = null;
+            foreach (var candidate in candidateEnvFiles)
+            {
+                if (File.Exists(candidate))
+                {
+                    envFile = candidate;
+                    break;
+                }
+            }
+
+            if (envFile == null)
                 return;
 
             foreach (var line in File.ReadAllLines(envFile))
@@ -99,15 +117,8 @@ namespace StudyPlanner.Helpers
         /// </summary>
         public static string GetGoogleApiKey()
         {
-            // 1. Environment variable'dan (en yüksek öncelik)
-            var envKey = Environment.GetEnvironmentVariable("GOOGLE_API_KEY");
-            if (!string.IsNullOrWhiteSpace(envKey))
-                return envKey;
-
-            // 2. appsettings.json'dan
-            var configKey = Configuration["ApiSettings:GoogleApiKey"];
-            if (!string.IsNullOrWhiteSpace(configKey))
-                return configKey;
+            if (TryGetGoogleApiKey(out var key, out _))
+                return key;
 
             throw new InvalidOperationException(
                 "Google API Key bulunamadı!\n\n" +
@@ -117,6 +128,42 @@ namespace StudyPlanner.Helpers
                 "3. Environment variable olarak GOOGLE_API_KEY tanımlayın\n\n" +
                 "API Key almak için: https://makersuite.google.com/app/apikey"
             );
+        }
+
+        /// <summary>
+        /// Google API Key'i ve kaynağını (env/appsettings) döndürür.
+        /// </summary>
+        public static bool TryGetGoogleApiKey(out string apiKey, out string source)
+        {
+            // 1. Environment variable'dan (en yüksek öncelik)
+            var envKey = Environment.GetEnvironmentVariable(GoogleApiKeyEnvVarName);
+            if (!string.IsNullOrWhiteSpace(envKey))
+            {
+                apiKey = envKey.Trim();
+                source = $"Environment Variable ({GoogleApiKeyEnvVarName})";
+                return true;
+            }
+
+            // 2. appsettings.*.json'dan
+            var configKey = Configuration["ApiSettings:GoogleApiKey"];
+            if (!string.IsNullOrWhiteSpace(configKey))
+            {
+                apiKey = configKey.Trim();
+                source = $"appsettings.{GetEnvironment()}.json (ApiSettings:GoogleApiKey)";
+                return true;
+            }
+
+            apiKey = string.Empty;
+            source = "Not Found";
+            return false;
+        }
+
+        /// <summary>
+        /// Teşhis için API key kaynağını döndürür (key'i asla döndürmez).
+        /// </summary>
+        public static string GetGoogleApiKeySource()
+        {
+            return TryGetGoogleApiKey(out _, out var source) ? source : "Not Found";
         }
 
         /// <summary>

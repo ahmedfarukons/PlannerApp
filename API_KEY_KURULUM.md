@@ -18,13 +18,16 @@
 ```json
 {
   "ApiSettings": {
-    "GoogleApiKey": "AIzaSyC_BURAYA_API_KEY_YAPISTIRIN",
-    "ApiBaseUrl": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+    "GoogleApiKey": "BURAYA_API_KEY_YAPISTIRIN",
+    "ApiBaseUrl": "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
     "Temperature": 0.1,
     "MaxOutputTokens": 2048
   }
 }
 ```
+
+> Not: Bazı anahtarlarda `v1beta` endpoint’i `404 NOT_FOUND` döndürebiliyor. Bu durumda `v1` kullanın.
+> Ayrıca `gemini-1.5-flash-001` gibi model adları bu endpointte desteklenmeyebilir ve `404 NOT_FOUND` döndürebilir.
 
 **Seçenek B: .env dosyası**
 

@@ -6,7 +6,7 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using StudyPlanner.Interfaces;
-using StudyPlanner.Models;
+using PdfDoc = StudyPlanner.Models.DocumentSummary;
 
 namespace StudyPlanner.Services
 {
@@ -22,7 +22,7 @@ namespace StudyPlanner.Services
             _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
         }
 
-        public async Task<DocumentSummary> ProcessPdfAsync(string pdfPath)
+        public async Task<PdfDoc> ProcessPdfAsync(string pdfPath)
         {
             if (!File.Exists(pdfPath))
                 throw new FileNotFoundException("PDF dosyası bulunamadı", pdfPath);
@@ -32,16 +32,34 @@ namespace StudyPlanner.Services
             var text = await ExtractTextAsync(pdfPath);
 
             // AI ile özet ve model çıkarma
-            var summaryTask = _aiService.GenerateSummaryAsync(text);
-            var modelsTask = _aiService.ExtractModelsAsync(text);
+            string summaryResult = "Özet oluşturuluyor...";
+            string modelsResult = "Modeller çıkarılıyor...";
 
-            await Task.WhenAll(summaryTask, modelsTask);
+            try 
+            {
+                summaryResult = await _aiService.GenerateSummaryAsync(text);
+            }
+            catch (Exception ex)
+            {
+                summaryResult = $"⚠️ AI Özeti Oluşturulamadı.\n\nHata: {ex.Message}\n\nNot: PDF içeriği analiz için hazır, soru sorabilirsiniz.";
+            }
 
-            var summary = new DocumentSummary
+            try
+            {
+                modelsResult = await _aiService.ExtractModelsAsync(text);
+            }
+            catch (Exception ex)
+            {
+                modelsResult = $"⚠️ Modeller çıkarılamadı: {ex.Message}";
+            }
+
+            // await Task.WhenAll(summaryTask, modelsTask); // Artık gerek yok, sıralı ve güvenli çalışıyor
+
+            var summary = new PdfDoc
             {
                 FileName = Path.GetFileName(pdfPath),
-                Summary = summaryTask.Result,
-                ModelsUsed = modelsTask.Result,
+                Summary = summaryResult,
+                ModelsUsed = modelsResult,
                 UploadDate = DateTime.Now,
                 FileSize = fileInfo.Length,
                 PageCount = GetPageCount(pdfPath)

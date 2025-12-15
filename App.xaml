@@ -6,10 +6,13 @@
         <!-- Global Styles -->
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- Default Light Theme - ThemeService tarafından değiştirilebilir -->
+                <ResourceDictionary Source="Themes/LightTheme.xaml"/>
+                
                 <!-- DevExpress themes buraya eklenebilir -->
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Modern Color Scheme -->
+            <!-- Modern Color Scheme (backward compatibility) -->
             <SolidColorBrush x:Key="PrimaryColor" Color="#007ACC"/>
             <SolidColorBrush x:Key="SecondaryColor" Color="#28A745"/>
             <SolidColorBrush x:Key="DangerColor" Color="#DC3545"/>

@@ -108,9 +108,37 @@ namespace StudyPlanner.Models
             {
                 _priority = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(PriorityIndex));
+                OnPropertyChanged(nameof(PriorityDisplay));
                 ModifiedDate = DateTime.Now;
             }
         }
+
+        /// <summary>
+        /// ComboBox için index
+        /// </summary>
+        [XmlIgnore]
+        public int PriorityIndex
+        {
+            get => (int)Priority;
+            set
+            {
+                Priority = (PriorityLevel)value;
+            }
+        }
+
+        /// <summary>
+        /// Öncelik gösterimi (Türkçe)
+        /// </summary>
+        [XmlIgnore]
+        public string PriorityDisplay => Priority switch
+        {
+            PriorityLevel.Low => "Düşük",
+            PriorityLevel.Medium => "Orta",
+            PriorityLevel.High => "Yüksek",
+            PriorityLevel.Critical => "Kritik",
+            _ => "Orta"
+        };
 
         /// <summary>
         /// Çalışmanın tamamlanma durumu

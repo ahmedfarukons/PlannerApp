@@ -123,6 +123,39 @@ namespace StudyPlanner.ViewModels
         #region Command Methods
 
         /// <summary>
+        /// Dışarıdan verilen path ile PDF yükle
+        /// </summary>
+        public async Task LoadPdfFromPathAsync(string pdfPath)
+        {
+            try
+            {
+                if (!System.IO.File.Exists(pdfPath))
+                {
+                    _dialogService.ShowError("PDF dosyası bulunamadı!");
+                    return;
+                }
+
+                IsProcessing = true;
+
+                // PDF'i işle
+                CurrentDocument = await _pdfService.ProcessPdfAsync(pdfPath);
+                PdfText = await _pdfService.ExtractTextAsync(pdfPath);
+
+                HasDocument = true;
+
+                _dialogService.ShowMessage("PDF başarıyla analiz edildi!");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"PDF yükleme hatası: {ex.Message}");
+            }
+            finally
+            {
+                IsProcessing = false;
+            }
+        }
+
+        /// <summary>
         /// PDF dosyası yükler ve analiz eder
         /// </summary>
         private async Task UploadPdfAsync()

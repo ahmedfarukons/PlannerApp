@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using StudyPlanner.Models;
+using PdfDoc = StudyPlanner.Models.DocumentSummary;
 
 namespace StudyPlanner.Interfaces
 {
@@ -13,7 +13,7 @@ namespace StudyPlanner.Interfaces
         /// </summary>
         /// <param name="pdfPath">PDF dosya yolu</param>
         /// <returns>Döküman özeti</returns>
-        Task<DocumentSummary> ProcessPdfAsync(string pdfPath);
+        Task<PdfDoc> ProcessPdfAsync(string pdfPath);
 
         /// <summary>
         /// PDF'den metin çıkarır

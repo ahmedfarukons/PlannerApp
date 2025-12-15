@@ -35,6 +35,10 @@ namespace StudyPlanner
             // Service Provider oluştur
             _serviceProvider = serviceCollection.BuildServiceProvider();
 
+            // Temayı yükle
+            var themeService = _serviceProvider.GetRequiredService<ThemeService>();
+            themeService.LoadSavedTheme();
+
             // Main window'u göster
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
@@ -57,20 +61,53 @@ namespace StudyPlanner
             // Paper Bold AI Services
             // API anahtarı .env veya appsettings.json'dan okunur
             var apiKey = Helpers.ConfigurationHelper.GetGoogleApiKey();
-            services.AddSingleton<IAiService>(provider => new GeminiAiService(apiKey));
+            var apiKeySource = Helpers.ConfigurationHelper.GetGoogleApiKeySource();
+            var apiBaseUrl = Helpers.ConfigurationHelper.GetValue("ApiSettings:ApiBaseUrl");
+            var temperature = Helpers.ConfigurationHelper.GetDoubleValue("ApiSettings:Temperature", 0.1);
+            var maxOutputTokens = Helpers.ConfigurationHelper.GetIntValue("ApiSettings:MaxOutputTokens", 2048);
+            var modelCandidates = Helpers.ConfigurationHelper.GetValue("ApiSettings:ModelCandidates");
+
+            services.AddSingleton<IAiService>(_ =>
+                new GeminiAiService(
+                    apiKey: apiKey,
+                    apiBaseUrl: apiBaseUrl,
+                    temperature: temperature,
+                    maxOutputTokens: maxOutputTokens,
+                    apiKeySource: apiKeySource,
+                    modelCandidatesCsv: modelCandidates));
             services.AddTransient<IPdfService, PdfService>();
+
+            // PDF Library Service
+            services.AddSingleton<PdfLibraryService>();
+            
+            // Theme Service
+            services.AddSingleton<ThemeService>();
+            
+            // PDF Export Service
+            services.AddSingleton<PdfExportService>();
 
             // ViewModels - Transient olarak kaydet (her seferinde yeni instance)
             services.AddTransient<MainViewModel>();
             services.AddTransient<DocumentAnalyzerViewModel>();
+            services.AddTransient<PdfLibraryViewModel>(provider => 
+                new PdfLibraryViewModel(
+                    provider.GetRequiredService<PdfLibraryService>(),
+                    provider.GetRequiredService<IPdfService>(),
+                    provider.GetRequiredService<IAiService>(),
+                    provider.GetRequiredService<IDialogService>(),
+                    provider));
+            services.AddTransient<StatisticsViewModel>();
 
             // Views - Transient olarak kaydet
             services.AddTransient<MainWindow>(provider =>
             {
                 var viewModel = provider.GetRequiredService<MainViewModel>();
-                return new MainWindow(viewModel, provider);
+                var themeService = provider.GetRequiredService<ThemeService>();
+                return new MainWindow(viewModel, provider, themeService);
             });
             services.AddTransient<DocumentAnalyzerWindow>();
+            services.AddTransient<PdfLibraryWindow>();
+            services.AddTransient<StatisticsWindow>();
         }
 
         /// <summary>
