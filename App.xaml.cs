@@ -26,7 +26,7 @@ namespace StudyPlanner
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Application_Startup(object sender, StartupEventArgs e)
+        private async void Application_Startup(object sender, StartupEventArgs e)
         {
             try
             {
@@ -50,8 +50,13 @@ namespace StudyPlanner
                 var userService = _serviceProvider.GetRequiredService<IUserService>();
                 if (credentialStore.TryLoad(out var savedIdentifier, out var savedPassword))
                 {
-                    var auto = userService.LoginAsync(savedIdentifier, savedPassword).GetAwaiter().GetResult();
-                    if (!auto.Success)
+                    try
+                    {
+                        var auto = await userService.LoginAsync(savedIdentifier, savedPassword);
+                        if (!auto.Success)
+                            credentialStore.Clear();
+                    }
+                    catch
                     {
                         credentialStore.Clear();
                     }
