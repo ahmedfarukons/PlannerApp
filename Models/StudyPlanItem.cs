@@ -12,9 +12,9 @@ namespace StudyPlanner.Models
     {
         private DateTime _date;
         private int _durationMinutes;
-        private string _subject;
-        private string _notes;
-        private string _category;
+        private string _subject = string.Empty;
+        private string _notes = string.Empty;
+        private string _category = string.Empty;
         private PriorityLevel _priority;
         private bool _isCompleted;
 
@@ -61,7 +61,7 @@ namespace StudyPlanner.Models
             get => _subject;
             set
             {
-                _subject = value?.Trim();
+                _subject = (value ?? string.Empty).Trim();
                 OnPropertyChanged();
                 ModifiedDate = DateTime.Now;
             }
@@ -76,7 +76,7 @@ namespace StudyPlanner.Models
             get => _notes;
             set
             {
-                _notes = value?.Trim();
+                _notes = (value ?? string.Empty).Trim();
                 OnPropertyChanged();
                 ModifiedDate = DateTime.Now;
             }
@@ -91,7 +91,7 @@ namespace StudyPlanner.Models
             get => _category;
             set
             {
-                _category = value?.Trim();
+                _category = (value ?? string.Empty).Trim();
                 OnPropertyChanged();
                 ModifiedDate = DateTime.Now;
             }

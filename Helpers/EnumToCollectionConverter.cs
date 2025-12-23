@@ -21,10 +21,10 @@ namespace StudyPlanner.Helpers
         /// <summary>
         /// Enum'u koleksiyona çevirir
         /// </summary>
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value == null)
-                return null;
+                return Array.Empty<object>();
 
             return Enum.GetValues(value as Type ?? value.GetType()).Cast<object>();
         }
@@ -32,9 +32,9 @@ namespace StudyPlanner.Helpers
         /// <summary>
         /// Kullanılmaz
         /// </summary>
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            return value;
+            return value ?? Array.Empty<object>();
         }
 
         /// <summary>

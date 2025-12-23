@@ -31,7 +31,7 @@ namespace StudyPlanner.Services
 
             // Klasör yoksa oluştur
             var directory = Path.GetDirectoryName(_defaultFilePath);
-            if (!Directory.Exists(directory))
+            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }

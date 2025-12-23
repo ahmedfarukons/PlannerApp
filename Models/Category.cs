@@ -64,13 +64,15 @@ namespace StudyPlanner.Models
                 if (_documents != null)
                     _documents.CollectionChanged -= Documents_CollectionChanged;
                 
-                if (SetProperty(ref _documents, value))
-                {
-                    if (_documents != null)
-                        _documents.CollectionChanged += Documents_CollectionChanged;
-                    
-                    OnPropertyChanged(nameof(DocumentCount));
-                }
+                var newDocuments = value ?? new ObservableCollection<PdfDocument>();
+                if (ReferenceEquals(_documents, newDocuments))
+                    return;
+
+                _documents = newDocuments;
+                OnPropertyChanged();
+
+                _documents.CollectionChanged += Documents_CollectionChanged;
+                OnPropertyChanged(nameof(DocumentCount));
             }
         }
 

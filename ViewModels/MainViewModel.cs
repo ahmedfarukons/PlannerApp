@@ -20,10 +20,10 @@ namespace StudyPlanner.ViewModels
         private readonly IDataService<System.Collections.Generic.List<StudyPlanItem>> _dataService;
         private readonly IDialogService _dialogService;
 
-        private ObservableCollection<StudyPlanItem> _studyPlans;
-        private StudyPlanItem _selectedItem;
-        private StudyPlanItem _currentItem;
-        private string _searchText;
+        private ObservableCollection<StudyPlanItem> _studyPlans = new ObservableCollection<StudyPlanItem>();
+        private StudyPlanItem? _selectedItem;
+        private StudyPlanItem _currentItem = new StudyPlanItem();
+        private string _searchText = string.Empty;
         private bool _showCompletedOnly;
 
         #region Properties
@@ -40,7 +40,7 @@ namespace StudyPlanner.ViewModels
         /// <summary>
         /// Seçili çalışma planı
         /// </summary>
-        public StudyPlanItem SelectedItem
+        public StudyPlanItem? SelectedItem
         {
             get => _selectedItem;
             set
@@ -145,7 +145,7 @@ namespace StudyPlanner.ViewModels
             _dataService = dataService ?? throw new ArgumentNullException(nameof(dataService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
-            StudyPlans = new ObservableCollection<StudyPlanItem>();
+            StudyPlans = _studyPlans;
 
             // Commands initialization
             AddCommand = new RelayCommand(async _ => await AddItemAsync(), _ => CanAddItem());
@@ -196,6 +196,9 @@ namespace StudyPlanner.ViewModels
         {
             try
             {
+                if (SelectedItem == null)
+                    return;
+
                 await _repository.UpdateAsync(SelectedItem);
                 _dialogService.ShowMessage("Çalışma planı başarıyla güncellendi!");
                 
@@ -219,6 +222,9 @@ namespace StudyPlanner.ViewModels
         {
             try
             {
+                if (SelectedItem == null)
+                    return;
+
                 if (!_dialogService.ShowConfirmation("Seçili çalışma planını silmek istediğinize emin misiniz?"))
                     return;
 

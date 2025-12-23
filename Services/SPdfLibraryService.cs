@@ -43,7 +43,10 @@ namespace StudyPlanner.Services
                     var serializer = new XmlSerializer(typeof(PdfLibraryData));
                     using (var reader = new StreamReader(_dataFilePath))
                     {
-                        var data = (PdfLibraryData)serializer.Deserialize(reader);
+                        var data = serializer.Deserialize(reader) as PdfLibraryData;
+                        if (data == null)
+                            return GetDefaultCategories();
+
                         return ConvertToCategories(data);
                     }
                 }

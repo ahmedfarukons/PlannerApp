@@ -18,7 +18,7 @@ namespace StudyPlanner
     /// </summary>
     public partial class App : Application
     {
-        private ServiceProvider _serviceProvider;
+        private ServiceProvider? _serviceProvider;
 
         /// <summary>
         /// Application başlangıcında çalışır

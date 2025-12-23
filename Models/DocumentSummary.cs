@@ -9,12 +9,17 @@ namespace StudyPlanner.Models
     public class DocumentSummary : ViewModelBase
     {
         private string? _documentId;
-        private string _fileName;
-        private string _summary;
-        private string _modelsUsed;
+        private string _fileName = string.Empty;
+        private string _summary = string.Empty;
+        private string _modelsUsed = string.Empty;
         private DateTime _uploadDate;
         private long _fileSize;
         private int _pageCount;
+
+        public DocumentSummary()
+        {
+            _uploadDate = DateTime.Now;
+        }
 
         /// <summary>
         /// MongoDB Document Id (PDF kaydı) - opsiyonel

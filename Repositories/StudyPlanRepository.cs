@@ -37,7 +37,11 @@ namespace StudyPlanner.Repositories
         /// </summary>
         public async Task<StudyPlanItem> GetByIdAsync(Guid id)
         {
-            return await Task.FromResult(_items.FirstOrDefault(x => x.Id == id));
+            var item = _items.FirstOrDefault(x => x.Id == id);
+            if (item == null)
+                throw new KeyNotFoundException($"Çalışma planı bulunamadı. Id: {id}");
+
+            return await Task.FromResult(item);
         }
 
         /// <summary>

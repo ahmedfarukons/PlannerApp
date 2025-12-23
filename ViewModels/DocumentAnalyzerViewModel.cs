@@ -24,12 +24,12 @@ namespace StudyPlanner.ViewModels
 
         private string? _currentDocumentId;
 
-        private DocumentSummary _currentDocument;
-        private string _pdfText;
-        private string _questionText;
+        private DocumentSummary _currentDocument = new DocumentSummary();
+        private string _pdfText = string.Empty;
+        private string _questionText = string.Empty;
         private bool _isProcessing;
         private bool _hasDocument;
-        private ObservableCollection<ChatMessage> _chatMessages;
+        private ObservableCollection<ChatMessage> _chatMessages = new ObservableCollection<ChatMessage>();
 
         #region Properties
 
@@ -123,7 +123,8 @@ namespace StudyPlanner.ViewModels
             _chatRepository = chatRepository ?? throw new ArgumentNullException(nameof(chatRepository));
             _pdfRepository = pdfRepository ?? throw new ArgumentNullException(nameof(pdfRepository));
 
-            ChatMessages = new ObservableCollection<ChatMessage>();
+            // Defaults already set on fields; keep property assignment for binding update
+            ChatMessages = _chatMessages;
 
             // Commands
             UploadPdfCommand = new RelayCommand(async _ => await UploadPdfAsync(), _ => !IsProcessing);
@@ -151,7 +152,7 @@ namespace StudyPlanner.ViewModels
                 // PDF'i işle
                 CurrentDocument = await _pdfService.ProcessPdfAsync(pdfPath);
                 PdfText = await _pdfService.ExtractTextAsync(pdfPath);
-                _currentDocumentId = CurrentDocument?.DocumentId;
+                _currentDocumentId = CurrentDocument.DocumentId;
 
                 HasDocument = true;
 
@@ -188,7 +189,7 @@ namespace StudyPlanner.ViewModels
                 // PDF'i işle
                 CurrentDocument = await _pdfService.ProcessPdfAsync(openFileDialog.FileName);
                 PdfText = await _pdfService.ExtractTextAsync(openFileDialog.FileName);
-                _currentDocumentId = CurrentDocument?.DocumentId;
+                _currentDocumentId = CurrentDocument.DocumentId;
 
                 HasDocument = true;
 
@@ -259,8 +260,8 @@ namespace StudyPlanner.ViewModels
         /// </summary>
         private void ResetDocument()
         {
-            CurrentDocument = null;
-            PdfText = null;
+            CurrentDocument = new DocumentSummary();
+            PdfText = string.Empty;
             QuestionText = string.Empty;
             HasDocument = false;
             _currentDocumentId = null;
@@ -339,7 +340,7 @@ namespace StudyPlanner.ViewModels
                 };
 
                 _currentDocumentId = doc.Id;
-                PdfText = null; // bu modda tam metin yok
+                PdfText = string.Empty; // bu modda tam metin yok
                 HasDocument = true;
 
                 var msgs = await _chatRepository.GetMessagesAsync(_userContext.UserId!, doc.Id!, limit: 500);

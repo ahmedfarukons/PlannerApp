@@ -39,7 +39,7 @@ namespace StudyPlanner.Services
         /// <summary>
         /// Dosya açma dialogu gösterir
         /// </summary>
-        public string ShowOpenFileDialog(string filter = "XML Dosyaları (*.xml)|*.xml|Tüm Dosyalar (*.*)|*.*")
+        public string? ShowOpenFileDialog(string filter = "XML Dosyaları (*.xml)|*.xml|Tüm Dosyalar (*.*)|*.*")
         {
             var dialog = new OpenFileDialog
             {
@@ -55,7 +55,7 @@ namespace StudyPlanner.Services
         /// <summary>
         /// Dosya kaydetme dialogu gösterir
         /// </summary>
-        public string ShowSaveFileDialog(string filter = "XML Dosyaları (*.xml)|*.xml|Tüm Dosyalar (*.*)|*.*", 
+        public string? ShowSaveFileDialog(string filter = "XML Dosyaları (*.xml)|*.xml|Tüm Dosyalar (*.*)|*.*", 
                                          string defaultFileName = "plans.xml")
         {
             var dialog = new SaveFileDialog

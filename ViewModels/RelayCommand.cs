@@ -9,14 +9,14 @@ namespace StudyPlanner.ViewModels
     /// </summary>
     public class RelayCommand : ICommand
     {
-        private readonly Action<object> _execute;
-        private readonly Func<object, bool> _canExecute;
+        private readonly Action<object?> _execute;
+        private readonly Func<object?, bool>? _canExecute;
 
         /// <summary>
         /// Constructor - CanExecute kontrolü olmadan
         /// </summary>
         /// <param name="execute">Çalıştırılacak aksiyon</param>
-        public RelayCommand(Action<object> execute) : this(execute, null)
+        public RelayCommand(Action<object?> execute) : this(execute, null)
         {
         }
 
@@ -25,7 +25,7 @@ namespace StudyPlanner.ViewModels
         /// </summary>
         /// <param name="execute">Çalıştırılacak aksiyon</param>
         /// <param name="canExecute">Çalıştırılabilirlik kontrolü</param>
-        public RelayCommand(Action<object> execute, Func<object, bool> canExecute)
+        public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
@@ -34,24 +34,32 @@ namespace StudyPlanner.ViewModels
         /// <summary>
         /// CanExecute değişikliğini bildirir
         /// </summary>
-        public event EventHandler CanExecuteChanged
+        public event EventHandler? CanExecuteChanged
         {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
+            add
+            {
+                if (value != null)
+                    CommandManager.RequerySuggested += value;
+            }
+            remove
+            {
+                if (value != null)
+                    CommandManager.RequerySuggested -= value;
+            }
         }
 
         /// <summary>
         /// Komutun çalıştırılabilir olup olmadığını kontrol eder
         /// </summary>
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object? parameter)
         {
-            return _canExecute == null || _canExecute(parameter);
+            return _canExecute?.Invoke(parameter) ?? true;
         }
 
         /// <summary>
         /// Komutu çalıştırır
         /// </summary>
-        public void Execute(object parameter)
+        public void Execute(object? parameter)
         {
             _execute(parameter);
         }

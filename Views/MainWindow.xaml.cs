@@ -13,8 +13,8 @@ namespace StudyPlanner.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly SThemeService _themeService;
+        private readonly IServiceProvider? _serviceProvider;
+        private readonly SThemeService? _themeService;
         private bool _isHeaderCollapsed;
 
         /// <summary>
@@ -64,6 +64,9 @@ namespace StudyPlanner.Views
         {
             try
             {
+                if (_serviceProvider == null)
+                    throw new InvalidOperationException("ServiceProvider hazır değil (DI constructor kullanılmalı).");
+
                 var documentWindow = _serviceProvider.GetRequiredService<DocumentAnalyzerWindow>();
                 documentWindow.ShowDialog();
             }
@@ -81,6 +84,9 @@ namespace StudyPlanner.Views
         {
             try
             {
+                if (_serviceProvider == null)
+                    throw new InvalidOperationException("ServiceProvider hazır değil (DI constructor kullanılmalı).");
+
                 var libraryWindow = _serviceProvider.GetRequiredService<PdfLibraryWindow>();
                 libraryWindow.ShowDialog();
             }
@@ -98,6 +104,9 @@ namespace StudyPlanner.Views
         {
             try
             {
+                if (_serviceProvider == null)
+                    throw new InvalidOperationException("ServiceProvider hazır değil (DI constructor kullanılmalı).");
+
                 var historyWindow = _serviceProvider.GetRequiredService<HistoryWindow>();
                 historyWindow.ShowDialog();
             }
@@ -115,6 +124,9 @@ namespace StudyPlanner.Views
         {
             try
             {
+                if (_serviceProvider == null)
+                    throw new InvalidOperationException("ServiceProvider hazır değil (DI constructor kullanılmalı).");
+
                 var focusWindow = _serviceProvider.GetRequiredService<FocusZoneWindow>();
                 focusWindow.ShowDialog();
             }
@@ -132,6 +144,9 @@ namespace StudyPlanner.Views
         {
             try
             {
+                if (_serviceProvider == null)
+                    throw new InvalidOperationException("ServiceProvider hazır değil (DI constructor kullanılmalı).");
+
                 var statisticsWindow = _serviceProvider.GetRequiredService<StatisticsWindow>();
                 statisticsWindow.ShowDialog();
             }
@@ -149,6 +164,9 @@ namespace StudyPlanner.Views
         {
             try
             {
+                if (_themeService == null)
+                    throw new InvalidOperationException("ThemeService hazır değil (DI constructor kullanılmalı).");
+
                 _themeService.ToggleTheme();
                 
                 var currentTheme = _themeService.CurrentTheme;

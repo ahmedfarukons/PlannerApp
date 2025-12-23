@@ -20,7 +20,7 @@ namespace StudyPlanner.Helpers
                     PriorityLevel.Medium => "Orta",
                     PriorityLevel.High => "Yüksek",
                     PriorityLevel.Critical => "Kritik",
-                    _ => value.ToString()
+                    _ => priority.ToString()
                 };
             }
             return value?.ToString() ?? string.Empty;

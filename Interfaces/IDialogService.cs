@@ -36,7 +36,7 @@ namespace StudyPlanner.Interfaces
         /// </summary>
         /// <param name="filter">Dosya filtresi</param>
         /// <returns>Seçilen dosya yolu veya null</returns>
-        string ShowOpenFileDialog(string filter = "XML Dosyaları (*.xml)|*.xml|Tüm Dosyalar (*.*)|*.*");
+        string? ShowOpenFileDialog(string filter = "XML Dosyaları (*.xml)|*.xml|Tüm Dosyalar (*.*)|*.*");
 
         /// <summary>
         /// Dosya kaydetme dialogu gösterir
@@ -44,7 +44,7 @@ namespace StudyPlanner.Interfaces
         /// <param name="filter">Dosya filtresi</param>
         /// <param name="defaultFileName">Varsayılan dosya adı</param>
         /// <returns>Seçilen dosya yolu veya null</returns>
-        string ShowSaveFileDialog(string filter = "XML Dosyaları (*.xml)|*.xml|Tüm Dosyalar (*.*)|*.*", 
+        string? ShowSaveFileDialog(string filter = "XML Dosyaları (*.xml)|*.xml|Tüm Dosyalar (*.*)|*.*", 
                                    string defaultFileName = "plans.xml");
     }
 }

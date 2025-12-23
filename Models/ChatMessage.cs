@@ -15,7 +15,7 @@ namespace StudyPlanner.Models
         /// <summary>
         /// Mesaj içeriği
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         /// <summary>
         /// Mesaj zamanı

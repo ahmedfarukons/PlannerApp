@@ -13,14 +13,14 @@ namespace StudyPlanner.ViewModels
         /// <summary>
         /// PropertyChanged event - WPF binding için gerekli
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Property değişikliklerini bildirir
         /// CallerMemberName attribute sayesinde property adı otomatik alınır
         /// </summary>
         /// <param name="propertyName">Değişen property adı</param>
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -34,7 +34,7 @@ namespace StudyPlanner.ViewModels
         /// <param name="value">Yeni değer</param>
         /// <param name="propertyName">Property adı</param>
         /// <returns>Değer değiştiyse true</returns>
-        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
         {
             if (Equals(field, value))
                 return false;
