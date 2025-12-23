@@ -3,16 +3,14 @@ using StudyPlanner.ViewModels;
 
 namespace StudyPlanner.Views
 {
-    public partial class StatisticsWindow : Window
+    public partial class HistoryWindow : Window
     {
-        public StatisticsWindow(StatisticsViewModel viewModel)
+        public HistoryWindow(HistoryViewModel viewModel)
         {
             InitializeComponent();
             DataContext = viewModel;
         }
     }
 }
-
-
 
 

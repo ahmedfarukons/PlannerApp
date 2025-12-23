@@ -11,9 +11,9 @@ namespace StudyPlanner
 {
     public partial class Form1 : Form
     {
-        private BindingSource bindingSource;
-        private List<StudyPlanItem> items;
-        private Panel selectedCard;
+        private BindingSource _bindingSource;
+        private List<StudyPlanItem> _items;
+        private Panel _selectedCard;
 
         public Form1()
         {
@@ -36,18 +36,18 @@ namespace StudyPlanner
 
         private void InitializeDataModel()
         {
-            items = new List<StudyPlanItem>();
-            bindingSource = new BindingSource();
-            bindingSource.DataSource = items;
+            _items = new List<StudyPlanItem>();
+            _bindingSource = new BindingSource();
+            _bindingSource.DataSource = _items;
         }
 
         private void RenderList()
         {
             listPanel.SuspendLayout();
             listPanel.Controls.Clear();
-            for (int i = 0; i < items.Count; i++)
+            for (int i = 0; i < _items.Count; i++)
             {
-                var card = CreateCard(items[i], i);
+                var card = CreateCard(_items[i], i);
                 listPanel.Controls.Add(card);
             }
             listPanel.ResumeLayout();
@@ -109,8 +109,8 @@ namespace StudyPlanner
 
             card.Resize += (s, e) => SetRoundedRegion(card, 8);
             card.Cursor = Cursors.Hand;
-            card.MouseEnter += (s, e) => { if (card != selectedCard) card.BackColor = Color.FromArgb(250, 250, 250); };
-            card.MouseLeave += (s, e) => { if (card != selectedCard) card.BackColor = Color.White; };
+            card.MouseEnter += (s, e) => { if (card != _selectedCard) card.BackColor = Color.FromArgb(250, 250, 250); };
+            card.MouseLeave += (s, e) => { if (card != _selectedCard) card.BackColor = Color.White; };
             card.Click += (s, e) => SelectCard(card);
 
             return card;
@@ -118,11 +118,11 @@ namespace StudyPlanner
 
         private void SelectCard(Panel card)
         {
-            if (selectedCard != null && selectedCard != card)
-                selectedCard.BackColor = Color.White;
+            if (_selectedCard != null && _selectedCard != card)
+                _selectedCard.BackColor = Color.White;
 
-            selectedCard = card;
-            selectedCard.BackColor = Color.FromArgb(236, 245, 255);
+            _selectedCard = card;
+            _selectedCard.BackColor = Color.FromArgb(236, 245, 255);
         }
 
         private void SetRoundedRegion(Control c, int radius)
@@ -143,7 +143,7 @@ namespace StudyPlanner
             }
         }
 
-        private void btnAdd_Click(object sender, EventArgs e)
+        private void BtnAdd_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtSubject.Text))
             {
@@ -158,25 +158,25 @@ namespace StudyPlanner
                 Subject = txtSubject.Text.Trim(),
                 Notes = txtNotes.Text.Trim()
             };
-            items.Add(newItem);
+            _items.Add(newItem);
             RenderList();
 
             txtSubject.Clear();
             txtNotes.Clear();
         }
 
-        private void btnDelete_Click(object sender, EventArgs e)
+        private void BtnDelete_Click(object sender, EventArgs e)
         {
-            if (selectedCard == null) return;
-            int idx = (int)selectedCard.Tag;
-            if (idx < 0 || idx >= items.Count) return;
+            if (_selectedCard == null) return;
+            int idx = (int)_selectedCard.Tag;
+            if (idx < 0 || idx >= _items.Count) return;
 
-            items.RemoveAt(idx);
-            selectedCard = null;
+            _items.RemoveAt(idx);
+            _selectedCard = null;
             RenderList();
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void BtnSave_Click(object sender, EventArgs e)
         {
             using (var sfd = new SaveFileDialog())
             {
@@ -189,7 +189,7 @@ namespace StudyPlanner
                         var serializer = new XmlSerializer(typeof(List<StudyPlanItem>));
                         using (var fs = File.Open(sfd.FileName, FileMode.Create))
                         {
-                            serializer.Serialize(fs, items);
+                            serializer.Serialize(fs, _items);
                         }
                         MessageBox.Show("Kaydedildi.");
                     }
@@ -201,7 +201,7 @@ namespace StudyPlanner
             }
         }
 
-        private void btnLoad_Click(object sender, EventArgs e)
+        private void BtnLoad_Click(object sender, EventArgs e)
         {
             using (var ofd = new OpenFileDialog())
             {
@@ -214,7 +214,7 @@ namespace StudyPlanner
                         using (var fs = File.OpenRead(ofd.FileName))
                         {
                             var loaded = (List<StudyPlanItem>)serializer.Deserialize(fs);
-                            items = loaded ?? new List<StudyPlanItem>();
+                            _items = loaded ?? new List<StudyPlanItem>();
                             RenderList();
                         }
                     }
@@ -225,13 +225,5 @@ namespace StudyPlanner
                 }
             }
         }
-    }
-
-    public class StudyPlanItem
-    {
-        public DateTime Date { get; set; }
-        public int DurationMinutes { get; set; }
-        public string Subject { get; set; }
-        public string Notes { get; set; }
     }
 }

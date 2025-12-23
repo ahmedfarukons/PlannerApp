@@ -107,12 +107,13 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Header -->
+            <RowDefinition x:Name="HeaderRow" Height="Auto"/> <!-- Header -->
+            <RowDefinition Height="10"/> <!-- Notch -->
             <RowDefinition Height="*"/>    <!-- Content -->
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="{DynamicResource PrimaryBrush}" Padding="20">
+        <Border x:Name="HeaderBar" Grid.Row="0" Background="{DynamicResource PrimaryBrush}" Padding="20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -136,6 +137,16 @@
                             Background="#4CAF50"
                             Click="PdfLibrary_Click"
                             ToolTip="PDF Kütüphanesi - Kategoriler ve Dökümanlar"/>
+                    <Button Content="🕘 Geçmiş" 
+                            Style="{StaticResource ModernButtonStyle}"
+                            Background="#03A9F4"
+                            Click="History_Click"
+                            ToolTip="MongoDB geçmişi - PDF ve chat kayıtları"/>
+                    <Button Content="🎯 Focus Zone" 
+                            Style="{StaticResource ModernButtonStyle}"
+                            Background="#1E88E5"
+                            Click="FocusZone_Click"
+                            ToolTip="Pomodoro / odak modu"/>
                     <Button Content="📊 İstatistikler" 
                             Style="{StaticResource ModernButtonStyle}"
                             Background="#FF9800"
@@ -146,11 +157,11 @@
                             Background="#9C27B0"
                             Click="DocumentAnalyzer_Click"
                             ToolTip="Paper Bold AI - Döküman Analizi"/>
-                    <Button Content="🌙 Tema" 
+                    <Button Content="🎨 Tema" 
                             Style="{StaticResource ModernButtonStyle}"
                             Background="#607D8B"
                             Click="ToggleTheme_Click"
-                            ToolTip="Light/Dark Mode"/>
+                            ToolTip="Tema değiştir (Light/Dark/Ocean/Grape/Sunset)"/>
                     <Button Content="💾 Kaydet" 
                             Style="{StaticResource ModernButtonStyle}"
                             Background="#28A745"
@@ -165,8 +176,27 @@
             </Grid>
         </Border>
 
+        <!-- Notch (open/close header) -->
+        <Border Grid.Row="1"
+                Background="Transparent"
+                MouseLeftButtonUp="HeaderNotch_Click"
+                Cursor="Hand">
+            <Grid>
+                <Border HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource BorderBrush}"
+                        CornerRadius="10"
+                        Padding="10,2">
+                    <TextBlock x:Name="HeaderNotchText"
+                               Text="⌃"
+                               FontSize="14"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                </Border>
+            </Grid>
+        </Border>
+
         <!-- Main Content -->
-        <Grid Grid.Row="1" Margin="10">
+        <Grid Grid.Row="2" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250"/> <!-- Yan Panel -->
                 <ColumnDefinition Width="5"/> <!-- Splitter -->

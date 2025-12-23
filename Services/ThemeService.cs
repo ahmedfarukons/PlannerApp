@@ -34,15 +34,26 @@ namespace StudyPlanner.Services
         /// </summary>
         public bool IsDarkMode => CurrentTheme == "Dark";
 
+        // Kullanılabilir temalar (Themes/{Name}Theme.xaml)
+        private static readonly string[] ThemeOrder = new[]
+        {
+            "Light",
+            "Dark",
+            "Ocean",
+            "Grape",
+            "Sunset"
+        };
+
         /// <summary>
         /// Temayı değiştir
         /// </summary>
         public void ToggleTheme()
         {
-            if (IsDarkMode)
-                ApplyTheme("Light");
-            else
-                ApplyTheme("Dark");
+            // Artık Light/Dark yerine tema döngüsü
+            var idx = Array.IndexOf(ThemeOrder, CurrentTheme);
+            if (idx < 0) idx = 0;
+            var next = ThemeOrder[(idx + 1) % ThemeOrder.Length];
+            ApplyTheme(next);
         }
 
         /// <summary>
@@ -95,7 +106,7 @@ namespace StudyPlanner.Services
                 if (File.Exists(_themeFilePath))
                 {
                     var savedTheme = File.ReadAllText(_themeFilePath).Trim();
-                    if (savedTheme == "Light" || savedTheme == "Dark")
+                    if (Array.IndexOf(ThemeOrder, savedTheme) >= 0)
                     {
                         ApplyTheme(savedTheme);
                         return;
@@ -127,5 +138,7 @@ namespace StudyPlanner.Services
         }
     }
 }
+
+
 
 

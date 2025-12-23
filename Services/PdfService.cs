@@ -16,10 +16,14 @@ namespace StudyPlanner.Services
     public class PdfService : IPdfService
     {
         private readonly IAiService _aiService;
+        private readonly IUserContext _userContext;
+        private readonly IPdfDocumentRepository _pdfRepository;
 
-        public PdfService(IAiService aiService)
+        public PdfService(IAiService aiService, IUserContext userContext, IPdfDocumentRepository pdfRepository)
         {
             _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
+            _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+            _pdfRepository = pdfRepository ?? throw new ArgumentNullException(nameof(pdfRepository));
         }
 
         public async Task<PdfDoc> ProcessPdfAsync(string pdfPath)
@@ -64,6 +68,20 @@ namespace StudyPlanner.Services
                 FileSize = fileInfo.Length,
                 PageCount = GetPageCount(pdfPath)
             };
+
+            // MongoDB'ye kaydet (kullanıcı giriş yaptıysa)
+            if (_userContext.IsAuthenticated && !string.IsNullOrWhiteSpace(_userContext.UserId))
+            {
+                try
+                {
+                    var docId = await _pdfRepository.UpsertFromSummaryAsync(_userContext.UserId!, pdfPath, summary);
+                    summary.DocumentId = docId;
+                }
+                catch
+                {
+                    // Persist hatası UI'yı bozmasın (özet yine gösterilsin)
+                }
+            }
 
             return summary;
         }

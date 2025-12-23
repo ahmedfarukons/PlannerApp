@@ -18,6 +18,11 @@ namespace StudyPlanner.ViewModels
         private readonly IPdfService _pdfService;
         private readonly IAiService _aiService;
         private readonly IDialogService _dialogService;
+        private readonly IUserContext _userContext;
+        private readonly IChatRepository _chatRepository;
+        private readonly IPdfDocumentRepository _pdfRepository;
+
+        private string? _currentDocumentId;
 
         private DocumentSummary _currentDocument;
         private string _pdfText;
@@ -106,11 +111,17 @@ namespace StudyPlanner.ViewModels
         public DocumentAnalyzerViewModel(
             IPdfService pdfService,
             IAiService aiService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            IUserContext userContext,
+            IChatRepository chatRepository,
+            IPdfDocumentRepository pdfRepository)
         {
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
             _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+            _chatRepository = chatRepository ?? throw new ArgumentNullException(nameof(chatRepository));
+            _pdfRepository = pdfRepository ?? throw new ArgumentNullException(nameof(pdfRepository));
 
             ChatMessages = new ObservableCollection<ChatMessage>();
 
@@ -140,6 +151,7 @@ namespace StudyPlanner.ViewModels
                 // PDF'i işle
                 CurrentDocument = await _pdfService.ProcessPdfAsync(pdfPath);
                 PdfText = await _pdfService.ExtractTextAsync(pdfPath);
+                _currentDocumentId = CurrentDocument?.DocumentId;
 
                 HasDocument = true;
 
@@ -176,6 +188,7 @@ namespace StudyPlanner.ViewModels
                 // PDF'i işle
                 CurrentDocument = await _pdfService.ProcessPdfAsync(openFileDialog.FileName);
                 PdfText = await _pdfService.ExtractTextAsync(openFileDialog.FileName);
+                _currentDocumentId = CurrentDocument?.DocumentId;
 
                 HasDocument = true;
 
@@ -204,12 +217,16 @@ namespace StudyPlanner.ViewModels
                 IsProcessing = true;
 
                 // Kullanıcı mesajını ekle
-                ChatMessages.Add(new ChatMessage
+                var userMsg = new ChatMessage
                 {
                     IsUser = true,
                     Content = QuestionText,
                     Timestamp = DateTime.Now
-                });
+                };
+                ChatMessages.Add(userMsg);
+
+                // Mongo'ya kaydet (kullanıcı + doküman varsa)
+                await TryPersistChatAsync(isUser: true, content: userMsg.Content, timestampLocal: userMsg.Timestamp);
 
                 var question = QuestionText;
                 QuestionText = string.Empty;
@@ -218,12 +235,14 @@ namespace StudyPlanner.ViewModels
                 var answer = await _aiService.AskQuestionAsync(question, PdfText);
 
                 // AI cevabını ekle
-                ChatMessages.Add(new ChatMessage
+                var aiMsg = new ChatMessage
                 {
                     IsUser = false,
                     Content = answer,
                     Timestamp = DateTime.Now
-                });
+                };
+                ChatMessages.Add(aiMsg);
+                await TryPersistChatAsync(isUser: false, content: aiMsg.Content, timestampLocal: aiMsg.Timestamp);
             }
             catch (Exception ex)
             {
@@ -244,7 +263,30 @@ namespace StudyPlanner.ViewModels
             PdfText = null;
             QuestionText = string.Empty;
             HasDocument = false;
+            _currentDocumentId = null;
             ChatMessages.Clear();
+        }
+
+        private async Task TryPersistChatAsync(bool isUser, string content, DateTime timestampLocal)
+        {
+            try
+            {
+                if (!_userContext.IsAuthenticated || string.IsNullOrWhiteSpace(_userContext.UserId))
+                    return;
+                if (string.IsNullOrWhiteSpace(_currentDocumentId))
+                    return;
+
+                await _chatRepository.AddMessageAsync(
+                    userId: _userContext.UserId!,
+                    documentId: _currentDocumentId!,
+                    isUser: isUser,
+                    content: content,
+                    timestampUtc: timestampLocal.ToUniversalTime());
+            }
+            catch
+            {
+                // Persist hatası UI'yı bozmasın
+            }
         }
 
         #endregion
@@ -253,10 +295,73 @@ namespace StudyPlanner.ViewModels
 
         private bool CanAskQuestion()
         {
-            return HasDocument && !IsProcessing && !string.IsNullOrWhiteSpace(QuestionText);
+            // PdfText yoksa (örn: Mongo'dan sadece geçmiş gösteriminde) soru sormayı kapat.
+            return HasDocument && !IsProcessing && !string.IsNullOrWhiteSpace(QuestionText) && !string.IsNullOrWhiteSpace(PdfText);
         }
 
         #endregion
+
+        /// <summary>
+        /// MongoDB'den kayıtlı bir dokümanı ve chat geçmişini yükler (geçmiş görüntüleme)
+        /// </summary>
+        public async Task LoadFromMongoAsync(string documentId)
+        {
+            try
+            {
+                if (!_userContext.IsAuthenticated || string.IsNullOrWhiteSpace(_userContext.UserId))
+                {
+                    _dialogService.ShowError("Giriş yapılmamış.");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(documentId))
+                    return;
+
+                IsProcessing = true;
+                ChatMessages.Clear();
+
+                var doc = await _pdfRepository.GetByIdAsync(_userContext.UserId!, documentId);
+                if (doc == null)
+                {
+                    _dialogService.ShowError("Döküman bulunamadı.");
+                    return;
+                }
+
+                CurrentDocument = new DocumentSummary
+                {
+                    DocumentId = doc.Id,
+                    FileName = doc.FileName,
+                    Summary = doc.Summary,
+                    ModelsUsed = doc.ModelsUsed,
+                    UploadDate = doc.UploadDateUtc.ToLocalTime(),
+                    FileSize = doc.FileSize,
+                    PageCount = doc.PageCount
+                };
+
+                _currentDocumentId = doc.Id;
+                PdfText = null; // bu modda tam metin yok
+                HasDocument = true;
+
+                var msgs = await _chatRepository.GetMessagesAsync(_userContext.UserId!, doc.Id!, limit: 500);
+                foreach (var m in msgs)
+                {
+                    ChatMessages.Add(new ChatMessage
+                    {
+                        IsUser = m.IsUser,
+                        Content = m.Content,
+                        Timestamp = m.TimestampUtc.ToLocalTime()
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Geçmiş yükleme hatası: {ex.Message}");
+            }
+            finally
+            {
+                IsProcessing = false;
+            }
+        }
     }
 }
 

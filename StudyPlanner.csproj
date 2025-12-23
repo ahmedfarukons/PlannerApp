@@ -47,6 +47,12 @@
     
     <!-- HTTP Client -->
     <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
+
+    <!-- MongoDB -->
+    <PackageReference Include="MongoDB.Driver" Version="2.28.0" />
+
+    <!-- Password hashing -->
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
   </ItemGroup>
 
   <ItemGroup>

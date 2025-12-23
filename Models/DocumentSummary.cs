@@ -8,12 +8,22 @@ namespace StudyPlanner.Models
     /// </summary>
     public class DocumentSummary : ViewModelBase
     {
+        private string? _documentId;
         private string _fileName;
         private string _summary;
         private string _modelsUsed;
         private DateTime _uploadDate;
         private long _fileSize;
         private int _pageCount;
+
+        /// <summary>
+        /// MongoDB Document Id (PDF kaydı) - opsiyonel
+        /// </summary>
+        public string? DocumentId
+        {
+            get => _documentId;
+            set => SetProperty(ref _documentId, value);
+        }
 
         /// <summary>
         /// Dosya adı

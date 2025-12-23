@@ -15,6 +15,7 @@ namespace StudyPlanner.Views
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ThemeService _themeService;
+        private bool _isHeaderCollapsed;
 
         /// <summary>
         /// Constructor
@@ -36,6 +37,24 @@ namespace StudyPlanner.Views
             DataContext = viewModel;
             _serviceProvider = serviceProvider;
             _themeService = themeService;
+        }
+
+        private void HeaderNotch_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            _isHeaderCollapsed = !_isHeaderCollapsed;
+
+            if (_isHeaderCollapsed)
+            {
+                HeaderBar.Visibility = Visibility.Collapsed;
+                HeaderRow.Height = new GridLength(0);
+                HeaderNotchText.Text = "⌄";
+            }
+            else
+            {
+                HeaderBar.Visibility = Visibility.Visible;
+                HeaderRow.Height = GridLength.Auto;
+                HeaderNotchText.Text = "⌃";
+            }
         }
 
         /// <summary>
@@ -68,6 +87,40 @@ namespace StudyPlanner.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"PDF Kütüphanesi penceresi açılırken hata: {ex.Message}", 
+                    "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// MongoDB Geçmiş penceresini açar (PDF + chat kayıtları)
+        /// </summary>
+        private void History_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var historyWindow = _serviceProvider.GetRequiredService<HistoryWindow>();
+                historyWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Geçmiş penceresi açılırken hata: {ex.Message}",
+                    "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Focus Zone (Pomodoro) penceresini açar
+        /// </summary>
+        private void FocusZone_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var focusWindow = _serviceProvider.GetRequiredService<FocusZoneWindow>();
+                focusWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Focus Zone açılırken hata: {ex.Message}",
                     "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

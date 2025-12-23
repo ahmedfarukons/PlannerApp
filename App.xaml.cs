@@ -28,20 +28,69 @@ namespace StudyPlanner
         /// <param name="e"></param>
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            // Service Collection oluştur
-            var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
+            try
+            {
+                // Login penceresi kapanınca (MainWindow açılmadan önce) uygulama otomatik kapanmasın.
+                // Varsayılan ShutdownMode: OnLastWindowClose -> Login kapanınca app kapanabiliyor.
+                ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-            // Service Provider oluştur
-            _serviceProvider = serviceCollection.BuildServiceProvider();
+                // Service Collection oluştur
+                var serviceCollection = new ServiceCollection();
+                ConfigureServices(serviceCollection);
 
-            // Temayı yükle
-            var themeService = _serviceProvider.GetRequiredService<ThemeService>();
-            themeService.LoadSavedTheme();
+                // Service Provider oluştur
+                _serviceProvider = serviceCollection.BuildServiceProvider();
 
-            // Main window'u göster
-            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-            mainWindow.Show();
+                // Temayı yükle
+                var themeService = _serviceProvider.GetRequiredService<ThemeService>();
+                themeService.LoadSavedTheme();
+
+                // "Beni hatırla" -> auto login
+                var credentialStore = _serviceProvider.GetRequiredService<AuthCredentialStore>();
+                var userService = _serviceProvider.GetRequiredService<IUserService>();
+                if (credentialStore.TryLoad(out var savedIdentifier, out var savedPassword))
+                {
+                    var auto = userService.LoginAsync(savedIdentifier, savedPassword).GetAwaiter().GetResult();
+                    if (!auto.Success)
+                    {
+                        credentialStore.Clear();
+                    }
+                }
+
+                var userContext = _serviceProvider.GetRequiredService<IUserContext>();
+
+                // Login -> Main akışı (gerekirse)
+                if (!userContext.IsAuthenticated)
+                {
+                    var loginWindow = _serviceProvider.GetRequiredService<LoginWindow>();
+                    if (loginWindow.DataContext is LoginViewModel lvm)
+                        lvm.LoginIdentifier = savedIdentifier ?? string.Empty;
+
+                    var loginOk = loginWindow.ShowDialog() == true;
+                    if (!loginOk)
+                    {
+                        Shutdown();
+                        return;
+                    }
+                }
+
+                var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+                MainWindow = mainWindow;
+                mainWindow.Show();
+
+                // Artık ana pencere var; app, MainWindow kapanınca kapansın.
+                ShutdownMode = ShutdownMode.OnMainWindowClose;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Uygulama başlatılamadı: {ex.Message}\n\n" +
+                    "MongoDB için MONGO_CONNECTION_STRING ve MONGO_DATABASE ayarlarını kontrol edin.",
+                    "Başlatma Hatası",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                Shutdown();
+            }
         }
 
         /// <summary>
@@ -57,6 +106,19 @@ namespace StudyPlanner
             // Services - Singleton olarak kaydet
             services.AddSingleton<IDataService<List<StudyPlanItem>>, XmlDataService>();
             services.AddSingleton<IDialogService, DialogService>();
+
+            // MongoDB
+            var mongoConn = Helpers.ConfigurationHelper.GetMongoConnectionString();
+            var mongoDbName = Helpers.ConfigurationHelper.GetMongoDatabaseName();
+            services.AddSingleton(_ => new MongoDbContext(mongoConn, mongoDbName));
+            services.AddSingleton<MongoUserRepository>();
+            services.AddSingleton<IPdfDocumentRepository, MongoPdfDocumentRepository>();
+            services.AddSingleton<IChatRepository, MongoChatRepository>();
+
+            // Auth/session
+            services.AddSingleton<IUserContext, UserContext>();
+            services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<AuthCredentialStore>();
 
             // Paper Bold AI Services
             // API anahtarı .env veya appsettings.json'dan okunur
@@ -88,7 +150,10 @@ namespace StudyPlanner
 
             // ViewModels - Transient olarak kaydet (her seferinde yeni instance)
             services.AddTransient<MainViewModel>();
+            services.AddTransient<LoginViewModel>();
             services.AddTransient<DocumentAnalyzerViewModel>();
+            services.AddTransient<HistoryViewModel>();
+            services.AddTransient<FocusZoneViewModel>();
             services.AddTransient<PdfLibraryViewModel>(provider => 
                 new PdfLibraryViewModel(
                     provider.GetRequiredService<PdfLibraryService>(),
@@ -105,6 +170,10 @@ namespace StudyPlanner
                 var themeService = provider.GetRequiredService<ThemeService>();
                 return new MainWindow(viewModel, provider, themeService);
             });
+
+            services.AddTransient<LoginWindow>();
+            services.AddTransient<HistoryWindow>();
+            services.AddTransient<FocusZoneWindow>();
             services.AddTransient<DocumentAnalyzerWindow>();
             services.AddTransient<PdfLibraryWindow>();
             services.AddTransient<StatisticsWindow>();

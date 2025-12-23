@@ -13,6 +13,8 @@ namespace StudyPlanner.Helpers
         private static IConfiguration? _configuration;
         private static readonly object _lock = new object();
         private const string GoogleApiKeyEnvVarName = "GOOGLE_API_KEY";
+        private const string MongoConnectionStringEnvVarName = "MONGO_CONNECTION_STRING";
+        private const string MongoDatabaseEnvVarName = "MONGO_DATABASE";
 
         /// <summary>
         /// Konfigürasyonu yükler
@@ -164,6 +166,55 @@ namespace StudyPlanner.Helpers
         public static string GetGoogleApiKeySource()
         {
             return TryGetGoogleApiKey(out _, out var source) ? source : "Not Found";
+        }
+
+        /// <summary>
+        /// MongoDB connection string döndürür (önce env var, sonra appsettings).
+        /// </summary>
+        public static string GetMongoConnectionString()
+        {
+            var env = Environment.GetEnvironmentVariable(MongoConnectionStringEnvVarName);
+            if (!string.IsNullOrWhiteSpace(env))
+                return env.Trim();
+
+            var cfg = Configuration["MongoSettings:ConnectionString"];
+            if (!string.IsNullOrWhiteSpace(cfg))
+                return cfg.Trim();
+
+            throw new InvalidOperationException(
+                "MongoDB ConnectionString bulunamadı!\n\n" +
+                "Lütfen aşağıdakilerden birini ayarlayın:\n" +
+                $"1. Environment variable: {MongoConnectionStringEnvVarName}\n" +
+                "2. appsettings.json: MongoSettings:ConnectionString\n");
+        }
+
+        /// <summary>
+        /// MongoDB database name döndürür (önce env var, sonra appsettings, sonra default).
+        /// </summary>
+        public static string GetMongoDatabaseName(string defaultValue = "study_planner")
+        {
+            var env = Environment.GetEnvironmentVariable(MongoDatabaseEnvVarName);
+            if (!string.IsNullOrWhiteSpace(env))
+                return env.Trim();
+
+            var cfg = Configuration["MongoSettings:DatabaseName"];
+            if (!string.IsNullOrWhiteSpace(cfg))
+                return cfg.Trim();
+
+            return defaultValue;
+        }
+
+        public static string GetMongoConnectionStringSource()
+        {
+            var env = Environment.GetEnvironmentVariable(MongoConnectionStringEnvVarName);
+            if (!string.IsNullOrWhiteSpace(env))
+                return $"Environment Variable ({MongoConnectionStringEnvVarName})";
+
+            var cfg = Configuration["MongoSettings:ConnectionString"];
+            if (!string.IsNullOrWhiteSpace(cfg))
+                return $"appsettings.{GetEnvironment()}.json (MongoSettings:ConnectionString)";
+
+            return "Not Found";
         }
 
         /// <summary>
