@@ -13,13 +13,13 @@ namespace StudyPlanner.Services
     /// <summary>
     /// PDF işleme servisi implementasyonu
     /// </summary>
-    public class PdfService : IPdfService
+    public class SPdfService : IPdfService
     {
         private readonly IAiService _aiService;
         private readonly IUserContext _userContext;
         private readonly IPdfDocumentRepository _pdfRepository;
 
-        public PdfService(IAiService aiService, IUserContext userContext, IPdfDocumentRepository pdfRepository)
+        public SPdfService(IAiService aiService, IUserContext userContext, IPdfDocumentRepository pdfRepository)
         {
             _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));

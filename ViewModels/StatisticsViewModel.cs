@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using StudyPlanner.Interfaces;
 using StudyPlanner.Models;
+using StudyPlanner.Services;
 
 namespace StudyPlanner.ViewModels
 {
@@ -17,7 +18,7 @@ namespace StudyPlanner.ViewModels
     {
         private readonly IRepository<StudyPlanItem> _repository;
         private readonly IDialogService _dialogService;
-        private readonly Services.PdfExportService _exportService;
+        private readonly SPdfExportService _exportService;
 
         private ObservableCollection<StudyStatistic> _weeklyStats;
         private ObservableCollection<CategoryStatistic> _categoryStats;
@@ -32,7 +33,7 @@ namespace StudyPlanner.ViewModels
         public StatisticsViewModel(
             IRepository<StudyPlanItem> repository,
             IDialogService dialogService,
-            Services.PdfExportService exportService)
+            SPdfExportService exportService)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));

@@ -9,7 +9,7 @@ namespace StudyPlanner.Services
     /// SOLID: Single Responsibility - Sadece kullanıcı etkileşimi sorumluluğu
     /// Testability için interface kullanır
     /// </summary>
-    public class DialogService : IDialogService
+    public class SDialogService : IDialogService
     {
         /// <summary>
         /// Bilgilendirme mesajı gösterir

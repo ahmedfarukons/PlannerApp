@@ -12,12 +12,12 @@ namespace StudyPlanner.Services
     /// PDF kütüphanesi servis
     /// Kategorileri ve PDF'leri yönetir
     /// </summary>
-    public class PdfLibraryService
+    public class SPdfLibraryService
     {
         private const string DataFileName = "pdf_library.xml";
         private readonly string _dataFilePath;
 
-        public PdfLibraryService()
+        public SPdfLibraryService()
         {
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var appFolder = Path.Combine(appDataPath, "StudyPlanner");

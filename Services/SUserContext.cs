@@ -5,7 +5,7 @@ namespace StudyPlanner.Services
     /// <summary>
     /// Oturumdaki kullanıcıyı (UserId/Username) tutan basit context.
     /// </summary>
-    public class UserContext : IUserContext
+    public class SUserContext : IUserContext
     {
         public bool IsAuthenticated => !string.IsNullOrWhiteSpace(UserId);
         public string? UserId { get; private set; }

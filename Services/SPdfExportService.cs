@@ -17,7 +17,7 @@ namespace StudyPlanner.Services
     /// PDF export servisi
     /// Çalışma planları ve istatistikleri PDF'e aktarır
     /// </summary>
-    public class PdfExportService
+    public class SPdfExportService
     {
         /// <summary>
         /// Çalışma planlarını PDF olarak export et

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using StudyPlanner.Interfaces;
+using StudyPlanner.Models;
 using StudyPlanner.Services;
 
 namespace StudyPlanner.ViewModels
@@ -12,7 +13,7 @@ namespace StudyPlanner.ViewModels
     public class LoginViewModel : ViewModelBase
     {
         private readonly IUserService _userService;
-        private readonly AuthCredentialStore _credentialStore;
+        private readonly SAuthCredentialStore _credentialStore;
 
         private string _loginIdentifier = string.Empty;
         private string _loginPassword = string.Empty;
@@ -96,7 +97,7 @@ namespace StudyPlanner.ViewModels
 
         public event Action<bool>? AuthCompleted; // true => success
 
-        public LoginViewModel(IUserService userService, AuthCredentialStore credentialStore)
+        public LoginViewModel(IUserService userService, SAuthCredentialStore credentialStore)
         {
             _userService = userService;
             _credentialStore = credentialStore;

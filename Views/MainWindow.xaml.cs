@@ -14,7 +14,7 @@ namespace StudyPlanner.Views
     public partial class MainWindow : Window
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ThemeService _themeService;
+        private readonly SThemeService _themeService;
         private bool _isHeaderCollapsed;
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace StudyPlanner.Views
         /// <param name="viewModel">MainViewModel instance</param>
         /// <param name="serviceProvider">Service provider for creating new windows</param>
         /// <param name="themeService">Theme service for dark mode</param>
-        public MainWindow(MainViewModel viewModel, IServiceProvider serviceProvider, ThemeService themeService) : this()
+        public MainWindow(MainViewModel viewModel, IServiceProvider serviceProvider, SThemeService themeService) : this()
         {
             DataContext = viewModel;
             _serviceProvider = serviceProvider;

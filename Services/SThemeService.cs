@@ -8,12 +8,12 @@ namespace StudyPlanner.Services
     /// Tema yönetim servisi
     /// Light/Dark mode geçişi
     /// </summary>
-    public class ThemeService
+    public class SThemeService
     {
         private const string ThemeSettingFile = "theme_setting.txt";
         private readonly string _themeFilePath;
 
-        public ThemeService()
+        public SThemeService()
         {
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var appFolder = Path.Combine(appDataPath, "StudyPlanner");

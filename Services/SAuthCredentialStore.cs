@@ -10,11 +10,11 @@ namespace StudyPlanner.Services
     /// "Beni hatırla" için Windows DPAPI ile şifrelenmiş credential saklama.
     /// Not: Bu mekanizma sadece aynı Windows kullanıcı profili altında çözülür.
     /// </summary>
-    public class AuthCredentialStore
+    public class SAuthCredentialStore
     {
         private readonly string _filePath;
 
-        public AuthCredentialStore()
+        public SAuthCredentialStore()
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var folder = Path.Combine(appData, "StudyPlanner");

@@ -12,7 +12,7 @@ namespace StudyPlanner.Services
     /// XML dosya işlemleri için data service
     /// SOLID: Single Responsibility - Sadece dosya okuma/yazma sorumluluğu
     /// </summary>
-    public class XmlDataService : IDataService<List<StudyPlanItem>>
+    public class SXmlDataService : IDataService<List<StudyPlanItem>>
     {
         private const string DefaultFileName = "studyplans.xml";
         private readonly string _defaultFilePath;
@@ -20,7 +20,7 @@ namespace StudyPlanner.Services
         /// <summary>
         /// Constructor
         /// </summary>
-        public XmlDataService()
+        public SXmlDataService()
         {
             // Uygulama çalıştırma dizininde varsayılan dosya yolu
             _defaultFilePath = Path.Combine(

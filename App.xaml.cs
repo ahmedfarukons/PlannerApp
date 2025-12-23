@@ -42,11 +42,11 @@ namespace StudyPlanner
                 _serviceProvider = serviceCollection.BuildServiceProvider();
 
                 // Temayı yükle
-                var themeService = _serviceProvider.GetRequiredService<ThemeService>();
+                var themeService = _serviceProvider.GetRequiredService<SThemeService>();
                 themeService.LoadSavedTheme();
 
                 // "Beni hatırla" -> auto login
-                var credentialStore = _serviceProvider.GetRequiredService<AuthCredentialStore>();
+                var credentialStore = _serviceProvider.GetRequiredService<SAuthCredentialStore>();
                 var userService = _serviceProvider.GetRequiredService<IUserService>();
                 if (credentialStore.TryLoad(out var savedIdentifier, out var savedPassword))
                 {
@@ -104,8 +104,8 @@ namespace StudyPlanner
             services.AddSingleton<IRepository<StudyPlanItem>, StudyPlanRepository>();
 
             // Services - Singleton olarak kaydet
-            services.AddSingleton<IDataService<List<StudyPlanItem>>, XmlDataService>();
-            services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<IDataService<List<StudyPlanItem>>, SXmlDataService>();
+            services.AddSingleton<IDialogService, SDialogService>();
 
             // MongoDB
             var mongoConn = Helpers.ConfigurationHelper.GetMongoConnectionString();
@@ -116,9 +116,9 @@ namespace StudyPlanner
             services.AddSingleton<IChatRepository, MongoChatRepository>();
 
             // Auth/session
-            services.AddSingleton<IUserContext, UserContext>();
-            services.AddSingleton<IUserService, UserService>();
-            services.AddSingleton<AuthCredentialStore>();
+            services.AddSingleton<IUserContext, SUserContext>();
+            services.AddSingleton<IUserService, SUserService>();
+            services.AddSingleton<SAuthCredentialStore>();
 
             // Paper Bold AI Services
             // API anahtarı .env veya appsettings.json'dan okunur
@@ -130,23 +130,23 @@ namespace StudyPlanner
             var modelCandidates = Helpers.ConfigurationHelper.GetValue("ApiSettings:ModelCandidates");
 
             services.AddSingleton<IAiService>(_ =>
-                new GeminiAiService(
+                new SGeminiAiService(
                     apiKey: apiKey,
                     apiBaseUrl: apiBaseUrl,
                     temperature: temperature,
                     maxOutputTokens: maxOutputTokens,
                     apiKeySource: apiKeySource,
                     modelCandidatesCsv: modelCandidates));
-            services.AddTransient<IPdfService, PdfService>();
+            services.AddTransient<IPdfService, SPdfService>();
 
             // PDF Library Service
-            services.AddSingleton<PdfLibraryService>();
+            services.AddSingleton<SPdfLibraryService>();
             
             // Theme Service
-            services.AddSingleton<ThemeService>();
+            services.AddSingleton<SThemeService>();
             
             // PDF Export Service
-            services.AddSingleton<PdfExportService>();
+            services.AddSingleton<SPdfExportService>();
 
             // ViewModels - Transient olarak kaydet (her seferinde yeni instance)
             services.AddTransient<MainViewModel>();
@@ -156,7 +156,7 @@ namespace StudyPlanner
             services.AddTransient<FocusZoneViewModel>();
             services.AddTransient<PdfLibraryViewModel>(provider => 
                 new PdfLibraryViewModel(
-                    provider.GetRequiredService<PdfLibraryService>(),
+                    provider.GetRequiredService<SPdfLibraryService>(),
                     provider.GetRequiredService<IPdfService>(),
                     provider.GetRequiredService<IAiService>(),
                     provider.GetRequiredService<IDialogService>(),
@@ -167,7 +167,7 @@ namespace StudyPlanner
             services.AddTransient<MainWindow>(provider =>
             {
                 var viewModel = provider.GetRequiredService<MainViewModel>();
-                var themeService = provider.GetRequiredService<ThemeService>();
+                var themeService = provider.GetRequiredService<SThemeService>();
                 return new MainWindow(viewModel, provider, themeService);
             });
 

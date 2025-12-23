@@ -13,7 +13,7 @@ namespace StudyPlanner.Services
     /// <summary>
     /// Google Gemini AI servisi implementasyonu
     /// </summary>
-    public class GeminiAiService : IAiService
+    public class SGeminiAiService : IAiService
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
@@ -42,7 +42,7 @@ namespace StudyPlanner.Services
             "gemini-pro"
         };
 
-        public GeminiAiService(
+        public SGeminiAiService(
             string apiKey,
             string apiBaseUrl,
             double temperature = 0.1,

@@ -19,7 +19,7 @@ namespace StudyPlanner.ViewModels
     /// </summary>
     public class PdfLibraryViewModel : ViewModelBase
     {
-        private readonly PdfLibraryService _libraryService;
+        private readonly SPdfLibraryService _libraryService;
         private readonly IPdfService _pdfService;
         private readonly IAiService _aiService;
         private readonly IDialogService _dialogService;
@@ -33,7 +33,7 @@ namespace StudyPlanner.ViewModels
         private string _newCategoryIcon;
 
         public PdfLibraryViewModel(
-            PdfLibraryService libraryService,
+            SPdfLibraryService libraryService,
             IPdfService pdfService,
             IAiService aiService,
             IDialogService dialogService,
