@@ -12,6 +12,9 @@
 
                 <!-- Default Light Theme - ThemeService tarafından değiştirilebilir -->
                 <ResourceDictionary Source="Themes/LightTheme.xaml"/>
+                
+                <!-- Shared Styles -->
+                <ResourceDictionary Source="Themes/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Modern Color Scheme (backward compatibility) -->

@@ -189,7 +189,7 @@ namespace StudyPlanner.ViewModels
             NewCommand = new RelayCommand(_ => CreateNewItem());
             ToggleCompleteCommand = new RelayCommand(_ => ToggleComplete(), _ => SelectedItem != null);
 
-            OpenProfileCommand = new RelayCommand(_ => OpenProfile());
+            OpenProfileCommand = new RelayCommand(async _ => await OpenProfile());
             GenerateDataCommand = new RelayCommand(async _ => await GenerateRandomDataAsync());
 
             // Yeni item oluştur
@@ -201,7 +201,7 @@ namespace StudyPlanner.ViewModels
 
 
 
-        private void OpenProfile()
+        private async Task OpenProfile()
         {
             try
             {
@@ -215,6 +215,9 @@ namespace StudyPlanner.ViewModels
                 var profileWindow = app.ServiceProvider.GetRequiredService<Views.ProfileWindow>();
                 var viewModel = app.ServiceProvider.GetRequiredService<ViewModels.ProfileViewModel>();
                 
+                // Verileri yükle
+                await viewModel.LoadUserAsync();
+
                 profileWindow.DataContext = viewModel;
                 profileWindow.Owner = System.Windows.Application.Current.MainWindow;
                 profileWindow.ShowDialog();

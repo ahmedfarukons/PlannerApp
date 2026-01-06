@@ -32,8 +32,6 @@ namespace StudyPlanner.ViewModels
 
             SaveCommand = new RelayCommand(async _ => await SaveAsync());
             ChangePasswordCommand = new RelayCommand(async _ => await ChangePasswordAsync());
-            
-            LoadUserData();
         }
 
         public string Username
@@ -82,18 +80,26 @@ namespace StudyPlanner.ViewModels
         public ICommand SaveCommand { get; }
         public ICommand ChangePasswordCommand { get; }
 
-        private async void LoadUserData()
+        public async Task LoadUserAsync()
         {
-            if (!_userContext.IsAuthenticated) return;
+            if (!_userContext.IsAuthenticated)
+            {
+                _dialogService.ShowError("Oturum açık değil, profil yüklenemedi.");
+                return;
+            }
 
             try
             {
-                var user = await _userService.GetUserAsync(_userContext.UserId);
+                var user = await _userService.GetUserAsync(_userContext.UserId!);
                 if (user != null)
                 {
                     Username = user.Username;
                     FullName = user.FullName;
                     Email = user.Email;
+                }
+                else
+                {
+                    _dialogService.ShowError($"Kullanıcı veritabanında bulunamadı! (ID: {_userContext.UserId})");
                 }
             }
             catch (Exception ex)

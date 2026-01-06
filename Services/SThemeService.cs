@@ -72,7 +72,9 @@ namespace StudyPlanner.Services
                 ResourceDictionary? oldTheme = null;
                 foreach (var dict in app.Resources.MergedDictionaries)
                 {
-                    if (dict.Source != null && dict.Source.OriginalString.Contains("Themes/"))
+                    if (dict.Source != null && 
+                        dict.Source.OriginalString.Contains("Themes/") && 
+                        dict.Source.OriginalString.EndsWith("Theme.xaml"))
                     {
                         oldTheme = dict;
                         break;

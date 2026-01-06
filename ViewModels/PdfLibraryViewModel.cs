@@ -54,7 +54,10 @@ namespace StudyPlanner.ViewModels
             AddCategoryCommand = new RelayCommand(async _ => await AddCategoryAsync(), _ => CanAddCategory());
             DeleteCategoryCommand = new RelayCommand(async _ => await DeleteCategoryAsync(), _ => SelectedCategory != null);
             AddPdfCommand = new RelayCommand(async _ => await AddPdfAsync(), _ => SelectedCategory != null);
-            DeletePdfCommand = new RelayCommand(async _ => await DeletePdfAsync(), _ => SelectedDocument != null);
+            
+            // Fix: Parametreyi al ve kullan
+            DeletePdfCommand = new RelayCommand(async param => await DeletePdfAsync(param as PdfDocument));
+            
             OpenPdfCommand = new RelayCommand(param => OpenPdf(param as PdfDocument));
             AnalyzePdfCommand = new RelayCommand(param => AnalyzePdf(param as PdfDocument));
             RefreshCommand = new RelayCommand(async _ => await LoadDataAsync());
@@ -265,23 +268,27 @@ namespace StudyPlanner.ViewModels
             }
         }
 
-        private async Task DeletePdfAsync()
+        private async Task DeletePdfAsync(PdfDocument? document)
         {
-            if (SelectedDocument == null || SelectedCategory == null)
+            var doc = document ?? SelectedDocument;
+            
+            if (doc == null || SelectedCategory == null)
                 return;
 
             try
             {
                 var result = _dialogService.ShowConfirmation(
-                    $"'{SelectedDocument.Title}' PDF'ini silmek istediğinize emin misiniz?");
+                    $"'{doc.Title}' PDF'ini silmek istediğinize emin misiniz?");
 
                 if (!result)
                     return;
 
-                SelectedCategory.Documents.Remove(SelectedDocument);
+                SelectedCategory.Documents.Remove(doc);
                 await SaveDataAsync();
 
-                SelectedDocument = null;
+                if (SelectedDocument == doc)
+                    SelectedDocument = null;
+                    
                 _dialogService.ShowMessage("PDF silindi!");
             }
             catch (Exception ex)
@@ -331,7 +338,13 @@ namespace StudyPlanner.ViewModels
                     return;
                 }
 
-                // DocumentAnalyzer penceresini aç ve PDF'i yükle
+                if (_serviceProvider == null)
+                {
+                    _dialogService.ShowError("Servis sağlayıcı hatası (DI).");
+                    return;
+                }
+
+                // DocumentAnalyzer penceresini güvenli şekilde aç
                 var analyzerWindow = _serviceProvider.GetRequiredService<DocumentAnalyzerWindow>();
                 if (analyzerWindow != null)
                 {
@@ -341,14 +354,48 @@ namespace StudyPlanner.ViewModels
                     {
                         // Pencereyi göster
                         analyzerWindow.Show();
-                        // PDF'i otomatik yükle
-                        _ = viewModel.LoadPdfFromPathAsync(doc.FilePath);
+                        
+                        // PDF Kütüphanesi penceresini kapat (Aktif pencereyi bul ve kapat)
+                        foreach (System.Windows.Window window in System.Windows.Application.Current.Windows)
+                        {
+                            if (window is PdfLibraryWindow)
+                            {
+                                window.Close();
+                                break;
+                            }
+                        }
+                        
+                        // PDF'i otomatik yükle - Task hatasını yakalamak için
+                        _ = Task.Run(async () => 
+                        {
+                            try 
+                            { 
+                                await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () => 
+                                {
+                                    await viewModel.LoadPdfFromPathAsync(doc.FilePath);
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                // UI Thread üzerinde hata göster
+                                System.Windows.Application.Current.Dispatcher.Invoke(() => 
+                                {
+                                    _dialogService.ShowError($"PDF yüklenirken arka planda hata oluştu: {ex.Message}");
+                                });
+                            }
+                        });
+                    }
+                    else
+                    {
+                         _dialogService.ShowError("Pencere ViewModel'i başlatılamadı.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                _dialogService.ShowError($"PDF analiz edilirken hata: {ex.Message}");
+                // Kritik hata yakalama
+                System.Windows.MessageBox.Show($"PDF analiz başlatılırken kritik hata: {ex.Message}\n\n{ex.StackTrace}", 
+                    "Kritik Hata", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }
 
