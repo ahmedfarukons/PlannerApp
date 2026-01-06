@@ -162,7 +162,10 @@ namespace StudyPlanner
             services.AddTransient<LoginViewModel>();
             services.AddTransient<DocumentAnalyzerViewModel>();
             services.AddTransient<HistoryViewModel>();
-            services.AddTransient<FocusZoneViewModel>();
+            services.AddTransient<FocusZoneViewModel>(provider => 
+                new FocusZoneViewModel(
+                    provider.GetRequiredService<IDialogService>(),
+                    provider.GetRequiredService<IRepository<StudyPlanItem>>()));
             services.AddTransient<PdfLibraryViewModel>(provider => 
                 new PdfLibraryViewModel(
                     provider.GetRequiredService<SPdfLibraryService>(),

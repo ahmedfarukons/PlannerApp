@@ -52,6 +52,25 @@ namespace StudyPlanner.Models
             }
         }
 
+        private int _actualDurationMinutes;
+
+        /// <summary>
+        /// Gerçekleşen çalışma süresi (dakika)
+        /// </summary>
+        [XmlElement("ActualDurationMinutes")]
+        public int ActualDurationMinutes
+        {
+            get => _actualDurationMinutes;
+            set
+            {
+                if (value < 0) value = 0;
+                _actualDurationMinutes = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ActualDurationDisplay));
+                ModifiedDate = DateTime.Now;
+            }
+        }
+
         /// <summary>
         /// Ders veya konu adı
         /// </summary>
@@ -160,6 +179,12 @@ namespace StudyPlanner.Models
         /// </summary>
         [XmlIgnore]
         public string DurationDisplay => $"{DurationMinutes / 60}:{DurationMinutes % 60:00} saat";
+
+        /// <summary>
+        /// Gerçekleşen süre gösterimi
+        /// </summary>
+        [XmlIgnore]
+        public string ActualDurationDisplay => $"{ActualDurationMinutes / 60}:{ActualDurationMinutes % 60:00} saat";
 
         /// <summary>
         /// Tarih gösterimi (kısa format)
