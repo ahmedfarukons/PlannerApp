@@ -6,6 +6,8 @@ using System.Windows.Input;
 using StudyPlanner.Interfaces;
 using StudyPlanner.Models;
 
+using Microsoft.Extensions.DependencyInjection;
+using StudyPlanner.ViewModels;
 namespace StudyPlanner.ViewModels
 {
     /// <summary>
@@ -19,6 +21,8 @@ namespace StudyPlanner.ViewModels
         private readonly IRepository<StudyPlanItem> _repository;
         private readonly IDataService<System.Collections.Generic.List<StudyPlanItem>> _dataService;
         private readonly IDialogService _dialogService;
+        private readonly IUiSettingsService _uiSettingsService;
+        private readonly IUserContext _userContext;
 
         private ObservableCollection<StudyPlanItem> _studyPlans = new ObservableCollection<StudyPlanItem>();
         private StudyPlanItem? _selectedItem;
@@ -92,6 +96,19 @@ namespace StudyPlanner.ViewModels
             }
         }
 
+        public double UiScale
+        {
+            get => _uiSettingsService.UiScale;
+            set
+            {
+                if (_uiSettingsService.UiScale != value)
+                {
+                    _uiSettingsService.UiScale = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         #endregion
 
         #region Commands
@@ -131,6 +148,9 @@ namespace StudyPlanner.ViewModels
         /// </summary>
         public ICommand ToggleCompleteCommand { get; }
 
+        public ICommand OpenProfileCommand { get; }
+        public ICommand GenerateDataCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -139,11 +159,24 @@ namespace StudyPlanner.ViewModels
         public MainViewModel(
             IRepository<StudyPlanItem> repository,
             IDataService<System.Collections.Generic.List<StudyPlanItem>> dataService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            IUiSettingsService uiSettingsService,
+            IUserContext userContext)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _dataService = dataService ?? throw new ArgumentNullException(nameof(dataService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _uiSettingsService = uiSettingsService ?? throw new ArgumentNullException(nameof(uiSettingsService));
+            _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+
+            // Service'deki değişiklikleri dinle
+            _uiSettingsService.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(IUiSettingsService.UiScale))
+                {
+                    OnPropertyChanged(nameof(UiScale));
+                }
+            };
 
             StudyPlans = _studyPlans;
 
@@ -156,11 +189,92 @@ namespace StudyPlanner.ViewModels
             NewCommand = new RelayCommand(_ => CreateNewItem());
             ToggleCompleteCommand = new RelayCommand(_ => ToggleComplete(), _ => SelectedItem != null);
 
+            OpenProfileCommand = new RelayCommand(_ => OpenProfile());
+            GenerateDataCommand = new RelayCommand(async _ => await GenerateRandomDataAsync());
+
             // Yeni item oluştur
             CreateNewItem();
 
-            // Verileri yükle
-            _ = LoadDataAsync();
+            // Verileri yükle & Rastgele veri (eğer boşsa)
+            _ = LoadDataAndInitializeAsync();
+        }
+
+
+
+        private void OpenProfile()
+        {
+            try
+            {
+                var app = (App)System.Windows.Application.Current;
+                if (app.ServiceProvider == null)
+                {
+                    _dialogService.ShowError("Servis sağlayıcı başlatılamadı.");
+                    return;
+                }
+
+                var profileWindow = app.ServiceProvider.GetRequiredService<Views.ProfileWindow>();
+                var viewModel = app.ServiceProvider.GetRequiredService<ViewModels.ProfileViewModel>();
+                
+                profileWindow.DataContext = viewModel;
+                profileWindow.Owner = System.Windows.Application.Current.MainWindow;
+                profileWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Profil penceresi açılırken hata oluştu: {ex.Message}");
+            }
+        }
+
+        private async Task LoadDataAndInitializeAsync()
+        {
+            try 
+            {
+                await LoadDataAsync();
+                
+                // Auto-populate for bilal@gmail.com if empty
+                if (StudyPlans.Count == 0 && 
+                    (_userContext.Username?.Equals("bilal@gmail.com", StringComparison.OrdinalIgnoreCase) == true ||
+                     _userContext.Username?.Contains("bilal", StringComparison.OrdinalIgnoreCase) == true))
+                {
+                     await GenerateRandomDataAsync();
+                }
+            }
+            catch {}
+        }
+
+        private async Task GenerateRandomDataAsync()
+        {
+            try
+            {
+                var random = new Random();
+                var subjects = new[] { "Matematik Türev", "Fizik Optik", "Kimya Organik", "Biyoloji Sistemler", "Tarih 1. Dünya Savaşı", "Edebiyat Divan", "İngilizce Kelime" };
+                var categories = new[] { "Matematik", "Fizik", "Kimya", "Biyoloji", "Tarih", "Edebiyat", "Language" };
+                
+                for (int i = 0; i < 15; i++)
+                {
+                    var item = new StudyPlanItem
+                    {
+                        Subject = subjects[random.Next(subjects.Length)],
+                        Category = categories[random.Next(categories.Length)],
+                        Date = DateTime.Now.AddDays(random.Next(-5, 10)).AddHours(random.Next(8, 20)),
+                        DurationMinutes = random.Next(1, 5) * 30, // 30, 60, 90, 120
+                        Priority = (PriorityLevel)random.Next(0, 3),
+                        IsCompleted = random.NextDouble() > 0.5,
+                        Notes = "Rastgele oluşturulmuş çalışma planı."
+                    };
+
+                    await _repository.AddAsync(item);
+                    StudyPlans.Add(item);
+                }
+                
+                // İstatistikleri güncellemek için
+                CommandManager.InvalidateRequerySuggested();
+                _dialogService.ShowMessage("Rastgele veriler eklendi!");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Veri oluşturma hatası: {ex.Message}");
+            }
         }
 
         #region Command Methods

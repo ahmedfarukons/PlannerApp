@@ -45,6 +45,12 @@ namespace StudyPlanner.Repositories
             await _db.Users.InsertOneAsync(user);
             return user;
         }
+
+        public async Task<bool> UpdateAsync(MongoUser user)
+        {
+            var result = await _db.Users.ReplaceOneAsync(u => u.Id == user.Id, user);
+            return result.ModifiedCount > 0;
+        }
     }
 }
 

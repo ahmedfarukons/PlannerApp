@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using StudyPlanner.Models;
 using StudyPlanner.Services;
 using StudyPlanner.Interfaces;
+using StudyPlanner.Views;
 
 namespace StudyPlanner.ViewModels
 {
@@ -331,7 +332,7 @@ namespace StudyPlanner.ViewModels
                 }
 
                 // DocumentAnalyzer penceresini aç ve PDF'i yükle
-                var analyzerWindow = _serviceProvider.GetRequiredService(typeof(Views.DocumentAnalyzerWindow)) as Views.DocumentAnalyzerWindow;
+                var analyzerWindow = _serviceProvider.GetRequiredService<DocumentAnalyzerWindow>();
                 if (analyzerWindow != null)
                 {
                     // ViewModel'e PDF yolunu aktar

@@ -13,7 +13,7 @@
     <Color x:Key="CardColor">#252525</Color>
     
     <!-- Softer text colors like Notion -->
-    <Color x:Key="TextPrimaryColor">#E3E2E0</Color>
+    <Color x:Key="TextPrimaryColor">#FFFFFF</Color>
     <Color x:Key="TextSecondaryColor">#9B9A97</Color>
     <Color x:Key="TextDisabledColor">#5A5A5A</Color>
     

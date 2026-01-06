@@ -77,8 +77,9 @@
                                 <Setter TargetName="border" Property="Background" Value="{StaticResource HoverColor}"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryColor}"/>
-                                <Setter TargetName="border" Property="Opacity" Value="0.1"/>
+                                <Setter TargetName="border" Property="Background" Value="#BBDEFB"/>
+                                <Setter TargetName="border" Property="Opacity" Value="1.0"/>
+                                <Setter Property="Foreground" Value="#0D47A1"/> 
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -114,7 +115,7 @@
                 </Border.ContextMenu>
                 <Border.InputBindings>
                     <MouseBinding Gesture="LeftClick" 
-                                Command="{Binding DataContext.AnalyzePdfCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.OpenPdfCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                 CommandParameter="{Binding}"/>
                 </Border.InputBindings>
                 <StackPanel>

@@ -7,6 +7,7 @@
         Title="🎯 Focus Zone"
         Height="650" Width="900"
         WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize"
         Background="{DynamicResource BackgroundBrush}">
 
     <Grid Margin="24">
@@ -62,13 +63,11 @@
                                FontSize="14"
                                Foreground="{DynamicResource TextSecondaryBrush}"/>
 
-                    <TextBlock Grid.Row="1"
-                               Text="{Binding RemainingDisplay}"
-                               FontSize="92"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource TextPrimaryBrush}"
-                               HorizontalAlignment="Center"
-                               Margin="0,14,0,10"/>
+                    <Viewbox Grid.Row="1" Margin="0,14,0,10" MaxHeight="150">
+                        <TextBlock Text="{Binding RemainingDisplay}"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </Viewbox>
 
                     <ProgressBar Grid.Row="2"
                                  Height="18"

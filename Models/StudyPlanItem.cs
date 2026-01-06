@@ -61,7 +61,7 @@ namespace StudyPlanner.Models
             get => _subject;
             set
             {
-                _subject = (value ?? string.Empty).Trim();
+                _subject = value ?? string.Empty;
                 OnPropertyChanged();
                 ModifiedDate = DateTime.Now;
             }
@@ -76,7 +76,7 @@ namespace StudyPlanner.Models
             get => _notes;
             set
             {
-                _notes = (value ?? string.Empty).Trim();
+                _notes = value ?? string.Empty;
                 OnPropertyChanged();
                 ModifiedDate = DateTime.Now;
             }
@@ -91,7 +91,7 @@ namespace StudyPlanner.Models
             get => _category;
             set
             {
-                _category = (value ?? string.Empty).Trim();
+                _category = value ?? string.Empty;
                 OnPropertyChanged();
                 ModifiedDate = DateTime.Now;
             }

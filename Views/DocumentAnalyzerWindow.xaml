@@ -5,7 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Döküman Analiz - Paper Bold AI" 
+        Title="Döküman Analiz - StudyPlanner AI" 
         Height="800" Width="1400"
         WindowStartupLocation="CenterScreen"
         Background="#FAFAFA">
@@ -136,7 +136,7 @@
 
                 <!-- Logo & Title -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="📄 Paper Bold AI" 
+                    <TextBlock Text="🧠 StudyPlanner AI" 
                              FontSize="28" 
                              FontWeight="Bold" 
                              Foreground="White"/>

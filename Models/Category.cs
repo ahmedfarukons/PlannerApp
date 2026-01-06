@@ -19,6 +19,7 @@ namespace StudyPlanner.Models
             _icon = "📁";
             _color = "#2196F3";
             _documents = new ObservableCollection<PdfDocument>();
+            _documents.CollectionChanged += Documents_CollectionChanged;
         }
 
         /// <summary>

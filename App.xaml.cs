@@ -18,7 +18,7 @@ namespace StudyPlanner
     /// </summary>
     public partial class App : Application
     {
-        private ServiceProvider? _serviceProvider;
+        public IServiceProvider ServiceProvider { get; private set; }
 
         /// <summary>
         /// Application başlangıcında çalışır
@@ -30,6 +30,9 @@ namespace StudyPlanner
         {
             try
             {
+                // Global exception handling
+                this.DispatcherUnhandledException += App_DispatcherUnhandledException;
+
                 // Login penceresi kapanınca (MainWindow açılmadan önce) uygulama otomatik kapanmasın.
                 // Varsayılan ShutdownMode: OnLastWindowClose -> Login kapanınca app kapanabiliyor.
                 ShutdownMode = ShutdownMode.OnExplicitShutdown;
@@ -39,15 +42,15 @@ namespace StudyPlanner
                 ConfigureServices(serviceCollection);
 
                 // Service Provider oluştur
-                _serviceProvider = serviceCollection.BuildServiceProvider();
+                ServiceProvider = serviceCollection.BuildServiceProvider();
 
                 // Temayı yükle
-                var themeService = _serviceProvider.GetRequiredService<SThemeService>();
+                var themeService = ServiceProvider.GetRequiredService<SThemeService>();
                 themeService.LoadSavedTheme();
 
                 // "Beni hatırla" -> auto login
-                var credentialStore = _serviceProvider.GetRequiredService<SAuthCredentialStore>();
-                var userService = _serviceProvider.GetRequiredService<IUserService>();
+                var credentialStore = ServiceProvider.GetRequiredService<SAuthCredentialStore>();
+                var userService = ServiceProvider.GetRequiredService<IUserService>();
                 if (credentialStore.TryLoad(out var savedIdentifier, out var savedPassword))
                 {
                     try
@@ -62,12 +65,12 @@ namespace StudyPlanner
                     }
                 }
 
-                var userContext = _serviceProvider.GetRequiredService<IUserContext>();
+                var userContext = ServiceProvider.GetRequiredService<IUserContext>();
 
                 // Login -> Main akışı (gerekirse)
                 if (!userContext.IsAuthenticated)
                 {
-                    var loginWindow = _serviceProvider.GetRequiredService<LoginWindow>();
+                    var loginWindow = ServiceProvider.GetRequiredService<LoginWindow>();
                     if (loginWindow.DataContext is LoginViewModel lvm)
                         lvm.LoginIdentifier = savedIdentifier ?? string.Empty;
 
@@ -79,7 +82,7 @@ namespace StudyPlanner
                     }
                 }
 
-                var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+                var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
                 MainWindow = mainWindow;
                 mainWindow.Show();
 
@@ -149,6 +152,7 @@ namespace StudyPlanner
             
             // Theme Service
             services.AddSingleton<SThemeService>();
+            services.AddSingleton<IUiSettingsService, SUiSettingsService>();
             
             // PDF Export Service
             services.AddSingleton<SPdfExportService>();
@@ -167,6 +171,7 @@ namespace StudyPlanner
                     provider.GetRequiredService<IDialogService>(),
                     provider));
             services.AddTransient<StatisticsViewModel>();
+            services.AddTransient<ProfileViewModel>();
 
             // Views - Transient olarak kaydet
             services.AddTransient<MainWindow>(provider =>
@@ -182,6 +187,7 @@ namespace StudyPlanner
             services.AddTransient<DocumentAnalyzerWindow>();
             services.AddTransient<PdfLibraryWindow>();
             services.AddTransient<StatisticsWindow>();
+            services.AddTransient<ProfileWindow>();
         }
 
         /// <summary>
@@ -190,8 +196,18 @@ namespace StudyPlanner
         /// <param name="e"></param>
         protected override void OnExit(ExitEventArgs e)
         {
-            _serviceProvider?.Dispose();
+            if (ServiceProvider is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
             base.OnExit(e);
+        }
+
+        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show($"Beklenmeyen bir hata oluştu: {e.Exception.Message}\n\nDetay: {e.Exception.InnerException?.Message}", 
+                "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            e.Handled = true; // Uygulamanın kapanmasını engelle
         }
     }
 }

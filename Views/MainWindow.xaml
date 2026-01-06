@@ -5,6 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:models="clr-namespace:StudyPlanner.Models"
         xmlns:helpers="clr-namespace:StudyPlanner.Helpers"
+        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
         mc:Ignorable="d"
         Title="Study Planner - Çalışma Planlayıcı" 
         Height="700" Width="1200"
@@ -103,9 +105,39 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         </Style>
+        <!-- DatePicker TextBox Style -->
+        <Style TargetType="DatePickerTextBox">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DatePickerTextBox}">
+                        <TextBox x:Name="PART_TextBox"
+                                 Text="{Binding Path=Text, RelativeSource={RelativeSource AncestorType={x:Type DatePicker}}}" 
+                                 Background="{TemplateBinding Background}"
+                                 Foreground="{TemplateBinding Foreground}"
+                                 BorderThickness="0"
+                                 Padding="{TemplateBinding Padding}"
+                                 VerticalContentAlignment="Center"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- DatePicker Style -->
+        <Style TargetType="DatePicker">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
+        <Grid.LayoutTransform>
+            <ScaleTransform ScaleX="{Binding UiScale}" ScaleY="{Binding UiScale}"/>
+        </Grid.LayoutTransform>
         <Grid.RowDefinitions>
             <RowDefinition x:Name="HeaderRow" Height="Auto"/> <!-- Header -->
             <RowDefinition Height="10"/> <!-- Notch -->
@@ -156,7 +188,7 @@
                             Style="{StaticResource ModernButtonStyle}"
                             Background="#9C27B0"
                             Click="DocumentAnalyzer_Click"
-                            ToolTip="Paper Bold AI - Döküman Analizi"/>
+                            ToolTip="AI Destekli Döküman Analizi"/>
                     <Button Content="🎨 Tema" 
                             Style="{StaticResource ModernButtonStyle}"
                             Background="#607D8B"
@@ -167,6 +199,11 @@
                             Background="#28A745"
                             Command="{Binding SaveCommand}"
                             ToolTip="Dosyaya kaydet"/>
+                    <Button Content="👤 Profil" 
+                            Style="{StaticResource ModernButtonStyle}"
+                            Background="#3F51B5"
+                            Command="{Binding OpenProfileCommand}"
+                            ToolTip="Profil Ayarları"/>
                     <Button Content="📂 Yükle" 
                             Style="{StaticResource ModernButtonStyle}"
                             Background="#FFC107"
@@ -348,11 +385,11 @@
                                     </Style>
                                 </Button.Style>
                                 <StackPanel>
-                                    <TextBlock Text="🤖 AI Döküman Analiz" 
+                                    <TextBlock Text="📈 AI Döküman Analiz" 
                                              FontSize="16" 
                                              FontWeight="SemiBold"
                                              Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                    <TextBlock Text="Paper Bold AI ile akademik makaleleri analiz edin" 
+                                    <TextBlock Text="Gemini AI ile akademik makaleleri analiz edin" 
                                              FontSize="11" 
                                              Foreground="{DynamicResource TextSecondaryBrush}"
                                              TextWrapping="Wrap"
@@ -529,7 +566,7 @@
                                                     <VisualBrush Stretch="None" AlignmentX="Left">
                                                         <VisualBrush.Visual>
                                                             <TextBlock Text="🔍 Ara..." 
-                                                                     Foreground="#AAAAAA" 
+                                                                     Foreground="#BBBBBB" 
                                                                      Margin="10,0,0,0"/>
                                                         </VisualBrush.Visual>
                                                     </VisualBrush>
@@ -544,70 +581,73 @@
                         <CheckBox Grid.Column="1" 
                                 Content="Sadece Tamamlananlar" 
                                 IsChecked="{Binding ShowCompletedOnly}"
+                                Foreground="{DynamicResource TextPrimaryBrush}"
                                 VerticalAlignment="Center"
                                 Margin="10,0,0,0"/>
                     </Grid>
 
-                    <!-- Data Grid -->
-                    <DataGrid Grid.Row="1" 
-                            ItemsSource="{Binding StudyPlans}"
-                            SelectedItem="{Binding SelectedItem}"
-                            AutoGenerateColumns="False"
-                            CanUserAddRows="False"
-                            CanUserDeleteRows="False"
-                            SelectionMode="Single"
-                            GridLinesVisibility="None"
-                            HeadersVisibility="Column"
-                            Background="{DynamicResource SurfaceBrush}"
-                            Foreground="{DynamicResource TextPrimaryBrush}"
-                            RowBackground="{DynamicResource CardBrush}"
-                            AlternatingRowBackground="{DynamicResource HoverBrush}"
-                            BorderThickness="0">
-                        <DataGrid.ColumnHeaderStyle>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter Property="Padding" Value="10,8"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="BorderThickness" Value="0,0,1,0"/>
-                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-                            </Style>
-                        </DataGrid.ColumnHeaderStyle>
-                        <DataGrid.CellStyle>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Padding" Value="10,5"/>
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="Foreground" Value="White"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.CellStyle>
-                        <DataGrid.Columns>
-                            <DataGridCheckBoxColumn Header="✓" 
-                                                  Binding="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" 
-                                                  Width="40"/>
-                            <DataGridTextColumn Header="Ders/Konu" 
-                                              Binding="{Binding Subject}" 
-                                              Width="*"/>
-                            <DataGridTextColumn Header="Kategori" 
-                                              Binding="{Binding Category}" 
-                                              Width="100"/>
-                            <DataGridTextColumn Header="Tarih" 
-                                              Binding="{Binding DateDisplay}" 
-                                              Width="150"/>
-                            <DataGridTextColumn Header="Süre" 
-                                              Binding="{Binding DurationDisplay}" 
-                                              Width="100"/>
-                            <DataGridTextColumn Header="Öncelik" 
-                                              Binding="{Binding PriorityDisplay}" 
-                                              Width="100"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <!-- DevExpress GridControl ile modern listeleme -->
+                    <dxg:GridControl Grid.Row="1"
+                                     ItemsSource="{Binding StudyPlans}"
+                                     SelectedItem="{Binding SelectedItem}"
+                                     AutoGenerateColumns="None"
+                                     Background="{DynamicResource CardBrush}"
+                                     Foreground="{DynamicResource TextPrimaryBrush}">
+                        
+                        <!-- Grid View Settings -->
+                        <dxg:GridControl.View>
+                            <dxg:TableView AllowEditing="False"
+                                           ShowGroupPanel="False"
+                                           NavigationStyle="Row"
+                                           AutoWidth="True"
+                                           AlternateRowBackground="{DynamicResource SurfaceBrush}" 
+                                           Background="{DynamicResource CardBrush}">
+
+                                <dxg:TableView.FormatConditions>
+                                    <dxg:FormatCondition Expression="[IsCompleted] = True" FieldName="Subject">
+                                        <dx:Format TextDecorations="Strikethrough" Foreground="Gray" />
+                                    </dxg:FormatCondition>
+                                </dxg:TableView.FormatConditions>
+
+                                <!-- Custom Row Style for Dark Mode -->
+                                <dxg:TableView.RowStyle>
+                                    <Style TargetType="dxg:RowControl">
+                                        <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </dxg:TableView.RowStyle>
+
+                                <!-- Column Header Style -->
+                                <dxg:TableView.ColumnHeaderStyle>
+                                    <Style TargetType="dxg:BaseGridHeader">
+                                        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                        <Setter Property="Padding" Value="10,5"/>
+                                    </Style>
+                                </dxg:TableView.ColumnHeaderStyle>
+
+                            </dxg:TableView>
+                        </dxg:GridControl.View>
+
+                        <dxg:GridControl.Columns>
+                            <dxg:GridColumn FieldName="Subject" Header="Ders/Konu"/>
+                            <dxg:GridColumn FieldName="Category" Header="Kategori" Width="100"/>
+                            <dxg:GridColumn FieldName="DateDisplay" Header="Tarih" Width="150"/>
+                            <dxg:GridColumn FieldName="DurationDisplay" Header="Süre" Width="100"/>
+                            <dxg:GridColumn FieldName="PriorityDisplay" Header="Öncelik" Width="100"/>
+                        </dxg:GridControl.Columns>
+                    </dxg:GridControl>
 
                     <!-- Action Buttons -->
                     <StackPanel Grid.Row="2" 

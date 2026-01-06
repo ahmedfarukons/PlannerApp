@@ -84,6 +84,34 @@ namespace StudyPlanner.Services
             return Task.CompletedTask;
         }
 
+        public async Task<MongoUser?> GetUserAsync(string userId)
+        {
+            return await _users.FindByIdAsync(userId);
+        }
+
+        public async Task<bool> UpdateUserAsync(MongoUser user)
+        {
+            // Validate basic fields
+            if (string.IsNullOrWhiteSpace(user.FullName) || string.IsNullOrWhiteSpace(user.Email))
+                return false;
+
+            return await _users.UpdateAsync(user);
+        }
+
+        public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        {
+            var user = await _users.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
+                return false;
+
+            if (newPassword.Length < 6) return false; // Basic validation
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            return await _users.UpdateAsync(user);
+        }
+
         private static bool LooksLikeEmail(string email)
         {
             // basit doğrulama
